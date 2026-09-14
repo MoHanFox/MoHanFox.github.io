@@ -1,0 +1,168 @@
+/* ============================================================
+   NavBar.css — 通用导航栏（所有页面顶部）
+   ============================================================ */
+
+/* 页面内容下移，避免被 fixed 导航栏遮挡 */
+body {
+    padding-top: 56px;
+}
+
+.halo-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    z-index: 900;
+    box-sizing: border-box;
+}
+
+/* ---------- 左侧：品牌 + 首页 ---------- */
+.halo-navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.halo-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.halo-nav-brand img {
+    width: 28px;
+    height: 28px;
+}
+
+.halo-nav-brand span {
+    font-family: 'oppoSansBold';
+    font-size: 20px;
+    color: #1a1a2e;
+    letter-spacing: 1px;
+}
+
+.halo-nav-home {
+    font-family: 'oppoSansLight';
+    font-size: 14px;
+    color: #2d6bef;
+    text-decoration: none;
+}
+
+.halo-nav-home:hover {
+    text-decoration: underline;
+}
+
+/* ---------- 右侧：用户区 / 登录 ---------- */
+.halo-navbar-right {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.halo-nav-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: background 0.2s ease;
+    user-select: none;
+}
+
+.halo-nav-user:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.halo-nav-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.halo-nav-name {
+    font-family: 'oppoSansMedium';
+    font-size: 14px;
+    color: #1a1a2e;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.halo-nav-caret {
+    font-size: 10px;
+    color: #888888;
+}
+
+/* ---------- 下拉菜单 ---------- */
+.halo-nav-dropdown {
+    position: absolute;
+    top: calc(100% + 20px);
+    right: 0;
+    min-width: 150px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 6px;
+    display: none;
+    z-index: 910;
+}
+
+.halo-nav-dropdown.show {
+    display: block;
+    animation: haloNavDropIn 0.15s ease;
+}
+
+@keyframes haloNavDropIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.halo-nav-dropdown a {
+    display: block;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-family: 'oppoSansLight';
+    font-size: 13px;
+    color: #1a1a2e;
+    text-decoration: none;
+}
+
+.halo-nav-dropdown a:hover {
+    background: #f0f4ff;
+    color: #2d6bef;
+}
+
+/* ---------- 未登录：登录按钮 ---------- */
+.halo-nav-login {
+    font-family: 'oppoSansMedium';
+    font-size: 13px;
+    color: #2d6bef;
+    text-decoration: none;
+    padding: 6px 16px;
+    border: 1.5px solid #2d6bef;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+}
+
+.halo-nav-login:hover {
+    background: #2d6bef;
+    color: #ffffff;
+}
