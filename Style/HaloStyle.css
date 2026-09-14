@@ -1,0 +1,109 @@
+@font-face {
+    font-family: 'oppoSansRegular';
+    src: url('../Resources/Fonts/OPlusSans3-Regular.ttf') format('truetype');
+    font-weight: normal;
+}
+@font-face {
+    font-family: 'oppoSansMedium';
+    src: url('../Resources/Fonts/OPlusSans3-Medium.ttf') format('truetype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'oppoSansLight';
+    src: url('../Resources/Fonts/OPlusSans3-Light.ttf') format('truetype');
+    font-weight: lighter;
+}
+
+@font-face {
+    font-family: 'oppoSansBold';
+    src: url('../Resources/Fonts/OPlusSans3-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+   
+.copyRight {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    color: #cccccc;
+    text-align: center;
+    padding: 14px 20px;
+    z-index: 999;
+}.copyRight::after {
+    content: "© 2026 TAverse & MOHAN · 保留所有权利";
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #cccccc;
+    font-family: 'oppoSansLight';
+}
+
+.HaloInput {
+    width: 100%;
+    height: 40px;
+
+    padding: 0 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #1a1a2e;
+    background-color: white;
+    outline: none;
+    transition: all 0.25s ease;
+    box-sizing: border-box;
+    font-family: 'oppoSansLight';
+}
+/* 鼠标点击输入框时（聚焦状态） */
+.HaloInput:focus {
+    border-color: #2a54de;
+    background-color: #ffffff;
+}
+/* 占位文字（默认显示的灰色提示） */
+.HaloInput::placeholder {
+    color: #afb7c1;
+    font-weight: 400;
+}
+.HaloInput:disabled {
+    color: #f3f4f6;
+}
+
+.HaloButton {
+    width: 100%;
+    height: 40px;
+    border: 2px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a2e;
+    background-color: #f3f4f6;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-sizing: border-box;
+    font-family: inherit;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+/* 鼠标悬停时 */
+.HaloButton:hover {
+    border-color: #2a54de;
+    background-color: #ebf4ff;
+    color: #2b6cb0;
+}
+/* 鼠标点击时（按下效果） */
+.HaloButton:active {
+    transform: scale(0.98);
+    /* 轻微缩小，模拟按压 */
+}
+.HaloButton.primary {
+    background-color: #4A90D9;
+    border-color: #4A90D9;
+    color: white;
+}
+.HaloButton.primary:hover {
+    background-color: #357ABD;
+    border-color: #357ABD;
+    color: white;
+}
