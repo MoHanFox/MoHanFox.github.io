@@ -4,7 +4,8 @@
 
 - **主页**：首屏打字机 Welcome → GitHub 数据面板 → JSON 驱动的简历树 → 页脚小猫
 - **博客**：文章来自本仓库的 **GitHub Issues**，由 GitHub Actions 自动构建成静态页面并发布
-- **协议**：请你遵守开源协议
+- **协议**：[PolyForm Noncommercial License 1.0.0](LICENSE) —— **非商业使用**，且**必须保留署名**（详见文末「开源协议」一节）
+
 ---
 
 ## 一、目录结构
@@ -59,6 +60,7 @@ MoHanFox.github.io/
 │
 ├── package.json                        构建脚本依赖（仅 marked）；站点本身无需打包
 ├── giscus.json                         ★ 评论（giscus / GitHub Discussions）配置，见第四节
+├── LICENSE                             ★ PolyForm Noncommercial 1.0.0（必须保留署名，见第八节）
 │
 ├── pages/
 │   └── blog/                           ── 博客（构建产物，由 Actions 生成）──
@@ -485,6 +487,46 @@ python -m http.server 8000
 ## 七、已知事项与后续优化
 
 - **字体体积**：`assets/fonts/` 约 45.5 MB，其中 `oplus-sans-3-extralight.ttf` 当前无 `@font-face` 引用（`base.css` 中已注释保留）。克隆体积偏大，后续可考虑按需子集化或 Git LFS。
-- **统计图依赖第三方**：公共统计服务在大陆网络下不稳定，已做降级；根治方式是换成自建实例。
 - **简历 QR/PDF**：`resume.css` 里已写 `@media print` 规则，浏览器直接打印简历不会带上页脚与跳转按钮。
 - `assets/css/components.css` 中的 `.HaloInput` / `.HaloButton` 首页未全部使用，保留供表单页复用。
+
+---
+
+## 八、开源协议
+
+本项目采用 **[PolyForm Noncommercial License 1.0.0](LICENSE)**（非商业许可 +  Copyleft）。完整条款见仓库根目录的 [LICENSE](LICENSE)。
+
+### 你可以做的
+
+| 用途 | 是否允许 |
+|---|---|
+| 个人学习、研究、实验、业余爱好项目 | ✅ |
+| 非商业组织使用（慈善、教育、公共科研、公共安全/卫生、环保、政府机构） | ✅ |
+| 修改、二次创作、再分发 | ✅（须遵守下面的署名与同等许可要求） |
+| **任何商业用途** | ❌ 需另行获得授权 |
+
+### 必须遵守的两条
+
+**1. 保留署名（显著位置标注原作者）**
+
+> 任何使用、复制或分发本软件的行为，必须在**显著位置**标注原作者 **MoHanFox** 及项目链接 **https://github.com/MoHanFox/MoHanFox.github.io**。
+
+无论是原样分发还是修改后分发，都必须保留。LICENSE 里对应这一行：
+
+```
+Required Notice: Copyright MoHanFox — https://github.com/MoHanFox/MoHanFox.github.io
+```
+
+PolyForm 的 `Notices` 条款规定：拿到本软件副本的人，你也必须把这一行（以及许可条款本身或它的 URL）一并给他。
+
+**2. Copyleft：衍生作品沿用同一许可**
+
+基于本项目做的修改与衍生作品，必须继续以 PolyForm Noncommercial 1.0.0 分发，不得改成更宽松的许可或闭源。
+
+### 页面上的署名
+
+站点每个页面底部都应保留可见的作者署名（页脚与导航栏的品牌区已有 `MOHAN` 标识）。若你fork后部署，请改成**你自己的**署名并注明本项目来源，而不是删掉署名。
+
+### 第三方资源
+
+`assets/fonts/`、`assets/img/` 下的素材与第三方依赖可能有各自的授权，商用前请自行确认；本项目自身的许可不覆盖它们。
