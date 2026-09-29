@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-29T19:27:42.093Z",
+  "generatedAt": "2026-09-29T19:37:38.402Z",
   "owner": "MoHanFox",
   "giteeOwner": "MoHanBi",
   "repoCount": 3,
   "sources": {
     "github": {
       "languages": 5,
-      "bytes": 386469
+      "bytes": 393828
     },
     "gitee": {
       "languages": 11,
@@ -16,7 +16,7 @@
   "languages": [
     {
       "name": "JavaScript",
-      "bytes": 268518
+      "bytes": 275877
     },
     {
       "name": "C#",

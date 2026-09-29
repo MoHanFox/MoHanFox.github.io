@@ -433,12 +433,32 @@
 
     /**
      * 首次加载时是否该恢复位置。
-     * 只有「返回/前进历史」或「刷新」才恢复；从导航栏主动点进博客则从顶部开始。
-     * 注意：同页 popstate 的导航类型仍是 'navigate'，所以那条路径不走这个判断，
-     * 由 popstate 处理器直接调用 restorePageScroll()。
+     *
+     * 这里踩过一个坑：原先只按 `performance.navigation.type` 判断，
+     * 只认 back_forward / reload。但「点导航栏的『博客』回列表」与
+     * 「直接输入网址」的 type **都是 navigate**，区分不了 —— 结果前者也被跳过，
+     * 而读者从文章页回列表最常用的就是这个入口。
+     *
+     * 改用**来源页**判断：浏览器的返回/前进与页面内跳转都会带上 referrer，
+     * 且它一直指向博客列表页；而从首页/外部进入时 referrer 为空或来自别处。
+     * 于是只跳过「从站外或首页直接进列表」这一种，其余一律恢复。
      */
+    function shouldRestoreOnLoad() {
+        // 浏览器返回/前进、刷新：一定要恢复
+        if (SHOULD_RESTORE) return true;
+        // 其余情况看来源页：来自博客目录（含文章页）就说明是「回列表」
+        try {
+            var ref = document.referrer || '';
+            if (!ref) return false;
+            // 从首页主动点「博客」→ 顶部开始；从别处来（含站外）也不恢复
+            return new URL(ref).pathname.indexOf('/pages/blog/') === 0;
+        } catch (error) {
+            return false;
+        }
+    }
+
     function restoreOnFirstLoad() {
-        if (SHOULD_RESTORE) restorePageScroll();
+        if (shouldRestoreOnLoad()) restorePageScroll();
     }
 
     // 节流保存滚动位置：scroll 事件很密集，没必要每次都写 sessionStorage
