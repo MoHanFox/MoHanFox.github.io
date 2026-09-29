@@ -135,9 +135,13 @@ export function normalizeIssue(issue) {
   const labels = labelNames(issue.labels);
   const tags = labels.filter((name) => name.toLowerCase() !== POST_LABEL && name.toLowerCase() !== DRAFT_LABEL);
   const body = typeof issue.body === 'string' ? issue.body : '';
+  // 作者取自 issue 的创建者。user 可能缺失（例如 API 返回被裁剪），所以逐层判空。
+  const author =
+    issue.user && typeof issue.user.login === 'string' ? issue.user.login.trim() : '';
   return {
     number: typeof issue.number === 'number' ? issue.number : Number(issue.number) || 0,
     title: typeof issue.title === 'string' ? issue.title.trim() : '',
+    author,
     url: issue.html_url || issue.url || '',
     state: typeof issue.state === 'string' ? issue.state : '',
     createdAt: issue.created_at || null,
