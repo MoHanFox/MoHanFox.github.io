@@ -24,8 +24,8 @@
     function typeSequence(queue, options, done) {
         var opts = options || {};
         var cursor = opts.cursor || null;
-        var typeSpeed = typeof opts.typeSpeed === 'number' ? opts.typeSpeed : 110;
-        var startDelay = typeof opts.startDelay === 'number' ? opts.startDelay : 420;
+        var typeSpeed = typeof opts.typeSpeed === 'number' ? opts.typeSpeed : 55;
+        var startDelay = typeof opts.startDelay === 'number' ? opts.startDelay : 220;
 
         // 元素无文本时直接跳过，避免出现「打印空串」的停顿
         var items = (queue || []).filter(function (entry) {
@@ -104,18 +104,30 @@
             { el: subEl, text: subText }
         ], {
             cursor: cursor,
-            typeSpeed: 110,
-            startDelay: 420
+            // 打字速度：每字 55ms（比原来的 110ms 快一倍），起始停顿也缩短
+            typeSpeed: 55,
+            startDelay: 220
         });
     }
 
-    /* ---------------- 2. 滚动入场 ---------------- */
+    /* ---------------- 2. 滚动划入 / 划出（非对称） ---------------- */
 
     /**
-     * 滚动入场。
+     * 滚动动画，刻意做成**非对称**的：
+     *
+     *   · 往下滑：板块进入视口时划入；划出视口**顶部**的板块保持原样（已经读过了，
+     *     不该在身后突然消失）。
+     *   · 往上滑：板块进入视口时划入；划出视口**底部**的板块淡出（那是还没读的
+     *     内容，收回视线时让它退场才符合直觉）。
+     *
+     * 所以判断依据不是「是否在视口内」这一个布尔值，而是「离开的是哪条边」，
+     * 这需要知道滚动方向 —— 见下面的 lastY。
+     *
      * 健壮性关键点：区块默认是可见的（CSS 只在 .js-reveal 存在时才隐藏），
      * 由这里在确认脚本可用后主动加上 .js-reveal 开启动画。这样——即便 JS 被
      * 拦截、报错或浏览器不支持 IntersectionObserver——正文也不会永久不可见。
+     *
+     * 另外**不能** unobserve：要处理「划出」，就得持续收到进出通知。
      */
     function initScrollReveal() {
         var nodes = document.querySelectorAll('[data-animate]');
@@ -126,30 +138,49 @@
 
         document.documentElement.classList.add('js-reveal');
 
+        var lastY = window.scrollY;
+
         var observer = new IntersectionObserver(function (entries) {
+            var goingDown = window.scrollY >= lastY;
+            lastY = window.scrollY;
+
             entries.forEach(function (entry) {
-                if (!entry.isIntersecting) return;
-                entry.target.classList.add('is-visible');
-                observer.unobserve(entry.target);
+                var target = entry.target;
+
+                if (entry.isIntersecting) {
+                    target.classList.add('is-visible');
+                    return;
+                }
+
+                // 视口之外：位于视口上方说明是「往下滑时从顶部离开」→ 保留状态；
+                // 位于下方说明是「往上滑时从底部离开」→ 淡出。
+                var rect = entry.boundingClientRect;
+                var above = rect.bottom <= 0;
+
+                if (above) {
+                    target.classList.add('is-visible');
+                } else if (!goingDown) {
+                    target.classList.remove('is-visible');
+                }
             });
         }, {
-            threshold: 0.12,
-            rootMargin: '0px 0px -8% 0px'
+            // 阈值取 0，配一点内缩：区块基本离开视口才处理，避免边缘反复抖动
+            threshold: 0,
+            rootMargin: '-6% 0px -6% 0px'
         });
 
         Array.prototype.forEach.call(nodes, function (node) {
             observer.observe(node);
         });
 
-        // 兜底：8 秒后仍未显示的一律直接显示，避免任何情况下内容被“藏住”
+        // 兜底：4 秒后把「当前在视口内」的补上显示，避免任何情况下内容被“藏住”
         window.setTimeout(function () {
             Array.prototype.forEach.call(nodes, function (node) {
-                if (!node.classList.contains('is-visible')) {
-                    node.classList.add('is-visible');
-                    observer.unobserve(node);
-                }
+                var rect = node.getBoundingClientRect();
+                var inView = rect.bottom > 0 && rect.top < window.innerHeight;
+                if (inView) node.classList.add('is-visible');
             });
-        }, 8000);
+        }, 4000);
     }
 
     /* ---------------- 启动 ---------------- */

@@ -22,11 +22,9 @@
 
         <main class="blog-wrap">
             <header class="blog-head">
-                <span class="blog-badge">来自 GitHub Issues</span>
                 <h1 class="blog-title">博客</h1>
                 <p class="blog-lead">
-                    这里的内容全部来自本仓库的 GitHub Issues：给 Issue 打上 <code>blog</code> 标签，
-                    构建管线就会自动把它发布成下面的文章。
+                    这里的内容全部来自本仓库的 GitHub Issues
                 </p>
             </header>
 
@@ -40,6 +38,14 @@
                     <button class="blog-search-clear" type="button" data-search-clear
                             aria-label="清空搜索" hidden>清空</button>
                 </div>
+                <label class="blog-search-scope">
+                    <span class="blog-search-scope-label">搜索范围</span>
+                    <select class="blog-search-select" data-search-scope
+                            aria-label="选择搜索范围">
+                        <option value="meta" selected>标题、摘要、标签</option>
+                        <option value="content">文章内关键字</option>
+                    </select>
+                </label>
             </div>
 
             <p class="blog-filter" data-filter-status hidden></p>

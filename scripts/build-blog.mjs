@@ -280,11 +280,15 @@ function renderTags(tags) {
   return `                <div class="blog-tags">${items.join('')}</div>`;
 }
 
+/** 文章正文写进 data-content 时保留的最大字符数（搜索结果用，截断只为控制页面体积） */
+const SEARCH_CONTENT_LIMIT = 3000;
+
 /**
  * 列表页的一张文章卡。
- * data-cats 存该文章的分类路径（空格分隔），前端侧栏据此做筛选；
- * data-text 存标题+摘要+标签的小写拼接，供前端搜索直接做子串匹配。
- * 两者都在构建时算好，前端不需要额外请求，也不会产生新的构建产物。
+ * data-cats    分类路径（空格分隔），侧栏据此筛选；
+ * data-text    标题+摘要+标签的小写拼接，供「标题、摘要、标签」范围搜索；
+ * data-content 正文纯文本（截断到 SEARCH_CONTENT_LIMIT），供「文章内关键字」范围搜索。
+ * 三者都在构建时算好，前端搜索不需要发请求。
  */
 function renderCard(issue, categories) {
   const number = Number(issue.number) || 0;
@@ -299,9 +303,13 @@ function renderCard(issue, categories) {
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
+  const contentText = toPlainText(issue.body).slice(0, SEARCH_CONTENT_LIMIT).toLowerCase();
 
   const lines = [
-    `<li class="blog-card" data-cats="${escapeHtml(cats.join(' '))}" data-text="${escapeHtml(searchText)}" data-number="${number}">`,
+    `<li class="blog-card" data-cats="${escapeHtml(cats.join(' '))}"` +
+    ` data-text="${escapeHtml(searchText)}"` +
+    ` data-content="${escapeHtml(contentText)}"` +
+    ` data-number="${number}">`,
     `<h2 class="blog-card-title"><a href="./${POST_FILE_PREFIX}${number}.html">${escapeHtml(title)}</a></h2>`,
     '<p class="blog-card-meta">',
     date ? `<span>${date}</span>` : '',
@@ -613,7 +621,11 @@ Options:
   } else if (isGiscusReady(giscusConfig)) {
     console.log(`[build-blog] 评论：已启用（giscus，分类 ${giscusConfig.category}）`);
   } else {
-    console.log(`[build-blog] 评论：等待补全 ${GISCUS_CONFIG_FILE} 的 category / categoryId（当前显示配置指引卡片）`);
+    const missing = ['repo', 'repoId', 'category', 'categoryId'].filter((key) => {
+      const value = giscusConfig[key];
+      return typeof value !== 'string' || !value.trim();
+    });
+    console.log(`[build-blog] 评论：等待补全 ${GISCUS_CONFIG_FILE} 的 ${missing.join(' / ')}（当前显示配置指引卡片）`);
   }
 
   return 0;

@@ -61,6 +61,60 @@
     }
 }
 
+/* ---------- 让图表脱离卡片框 ----------
+   assets/js/stats.js 会把每张统计图包进 .halo-stats-card，并自带白底、描边、圆角与
+   3D 倾角（那些样式是它注入的，本文件加载更晚，同优先级下按顺序覆盖）。
+   这里把「卡片外壳」抵消掉，让图表本身当作独立板块直接铺在区块里，
+   只保留内部留白与降级提示的排版。 */
+.stats-mount .halo-stats-card {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* 去掉立体倾角与悬停位移，图表保持平面 */
+.stats-mount .halo-stats-tilt > .halo-stats-card,
+.stats-mount .halo-stats-tilt > .halo-stats-card:hover,
+.stats-mount .halo-stats-tilt > .halo-stats-card:focus-within {
+    transform: none;
+    box-shadow: none;
+}
+
+/* 卡片头部标题/说明保持为普通文字，不再像卡片标题 */
+.stats-mount .halo-stats-card-head {
+    padding: 0 0 14px;
+    text-align: center;
+}
+
+.stats-mount .halo-stats-card-body {
+    padding: 0;
+}
+
+/* 统计图服务不可达时的降级块：
+   收紧内边距、文字居中，并去掉与外部标题重复的卡片标题，避免又变成一个大方框。
+   判定用 stats.js 写的 data-halo-stats-state="failed"，比 :has() 更严谨
+   （:has() 在降级块尚未被移除的时刻会误判，例如重试成功的那一帧）。 */
+.stats-mount .halo-stats-card[data-halo-stats-state="failed"] {
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+    text-align: center;
+}
+
+.stats-mount .halo-stats-card[data-halo-stats-state="failed"] .halo-stats-card-title {
+    display: none;
+}
+
+.stats-mount .halo-stats-card[data-halo-stats-state="failed"] .halo-stats-card-head {
+    padding-bottom: 4px;
+}
+
+.stats-mount .halo-stats-card[data-halo-stats-state="failed"] .halo-stats-card-body {
+    min-height: 0;
+}
+
+/* ---------- 小屏 ---------- */
 @media (max-width: 768px) {
     .stats {
         padding: 76px 0;
@@ -75,3 +129,4 @@
         max-width: 100%;
     }
 }
+

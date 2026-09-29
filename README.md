@@ -221,14 +221,24 @@ issues.json ──> scripts/build-blog.mjs ──> pages/blog/index.html        
 
 ### 首页搜索
 
-搜索框在**第一篇文章上方**。
+搜索框在**第一篇文章上方**，下面有一个**搜索范围**选择框。
 
-- 检索范围：**标题 + 摘要 + 标签**（构建时算好写进卡片的 `data-text`，前端只做子串匹配，不发请求）；
-- 大小写不敏感；输入多个关键字按「**都要命中**」处理（`go 并发` 只留同时含两者的文章）；
+| 范围 | 说明 |
+|---|---|
+| `标题、摘要、标签`（默认） | 匹配 `data-text`，构建时由标题 + 摘要 + 标签拼成 |
+| `文章内关键字` | 匹配 `data-content`，构建时由正文 Markdown 转成纯文本（去代码块/表格分隔行/标记） |
+
+- 切换范围会**清空关键字**并更新输入框提示语 —— 否则旧关键字在新范围下可能一篇都搜不到，容易让人以为坏了；
+- 检索全在**前端**完成（构建时就把可搜文本写进卡片属性），不发请求、不产生额外页面；
+- 大小写不敏感；多个关键字按「**都要命中**」处理（`go 并发` 只留同时含两者的文章）；
 - 输入有 120ms 防抖，回车立即生效；
 - 与分类筛选是**与**关系：先按分类缩小，再在结果里搜关键字；清掉关键字就回到该分类的全部；
-- 状态写进 URL 的 `?q=`（和分类的 `?cat=` 并存），刷新、分享链接、前进后退都能还原；
+- 状态写进 URL 的 `?q=` 与 `?scope=`（默认范围不写，避免冗余参数），刷新、分享链接、前进后退都能还原；
 - 无结果时列表位置显示「未找到相关文章」，并提供「清空」按钮。
+
+> ⚠️ **正文搜索的长度上限**：每篇文章只有**前 3000 个字符**会进入 `data-content`（见 `build-blog.mjs` 的 `SEARCH_CONTENT_LIMIT`）。
+> 这是为了控制列表页体积 —— 否则文章一多，首页会变成几百 KB。
+> 代价是**很长的文章，靠后的内容搜不到**。要完整可搜就得改成按需 fetch 正文，那样首屏更快但首次搜索会慢一拍。
 
 ### 首页分类侧栏
 
@@ -275,22 +285,29 @@ issues.json ──> scripts/build-blog.mjs ──> pages/blog/index.html        
 ### 评论功能（giscus）
 
 文章页底部有评论区，基于 **GitHub Discussions** —— 无需后端、无追踪，数据都在你自己的仓库里。
-配置在仓库根目录的 [giscus.json](giscus.json)，其中 `repo` 与 `repoId` **已经填好**，只差两个值：
+配置在仓库根目录的 [giscus.json](giscus.json)，**已配齐可直接用**：
 
-| 待办 | 在哪里做 |
-|---|---|
-| 1. 开启 Discussions | 仓库 **Settings → General → Features** 勾选 `Discussions` |
-| 2. 安装 giscus App | <https://github.com/apps/giscus>（不装的话访客无法评论） |
-| 3. 建一个 Discussion 分类 | Discussions → 新建分类，类型建议 **Announcements**（只有维护者与 giscus 能发帖） |
-| 4. 补 `category` 与 `categoryId` | 打开 <https://giscus.app> 填入仓库名，把页面给出的这两个值抄进 `giscus.json` |
+| 项 | 值 | 说明 |
+|---|---|---|
+| `repoId` | `R_kgDOUaoChQ` | 仓库的 node_id |
+| `category` | `Blog Chat` | Discussions 里的分类名 |
+| `categoryId` | `DIC_kwDOUaoChc4DGpxu` | 该分类的 node_id |
+| `theme` | `light` | **固定亮色**，与站点亮色底一致 |
+| `mapping` | `pathname` | 按文章页路径匹配 Discussion 标题，**改标题也不丢评论** |
 
-做完第 4 步后重新构建（或在 Actions 里手动跑一次），评论区即生效。
+**关于主题**：不要用 `preferred_color_scheme` —— 它会跟随访客的**系统**深色设置，
+而本站在两种情况下都是亮色底，访客开深色模式时评论区会变黑、与页面割裂。
+`light` 才能与站点保持一致（将来若做深色主题，再改成 `preferred_color_scheme`）。
 
-**在你补齐之前**，文章页会显示一张「评论区即将开放」的指引卡片而不是空白 —— 避免"开了评论却什么都没有"的困惑。
-不想开评论就把 `giscus.json` 的 `enabled` 改成 `false`：此时既不加载 `giscus.css`，也不加载任何外部脚本。
+**换分类时 `category` 与 `categoryId` 必须成对更新**，写错会让 giscus 直接报错。
 
-文章与 Discussion 的对应关系用 `mapping: "pathname"`（按文章页路径匹配 Discussion 标题），
-所以**文章标题改了也会继续对上同一条 Discussion**，不会丢评论。
+> 取 `categoryId` 的办法（GraphQL 与 giscus.app 都要授权，匿名拿不到）：
+> REST 的 `GET /repos/{owner}/{repo}/discussions` 响应里**带讨论所属分类的 node_id**，
+> 所以只要目标分类下已经有任意一条讨论，就能从这里读到它。
+> 注意该端点**只返回「有讨论的分类」**，空分类不会出现。
+
+不想开评论就把 `enabled` 改成 `false`：此时既不加载 `giscus.css`，也不加载任何外部脚本。
+配置齐全时加载脚本；开了评论但 id 没填全时显示「评论区即将开放」的指引卡片，而不是空白。
 
 ### 关于「能不能直接渲染 README / md」
 
