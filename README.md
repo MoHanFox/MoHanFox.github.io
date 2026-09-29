@@ -27,7 +27,7 @@ MoHanFox.github.io/
 │   │       ├── home/
 │   │       │   ├── base.css            区块节奏、标题组、滚动入场动画
 │   │       │   ├── hero.css            首屏：满屏背景 + 打字机标题
-│   │       │   ├── stats.css           第 2 屏骨架（卡片样式在 stats.js 内）
+│   │       │   ├── stats.css           第 2 屏骨架 + 方块城市与图例样式
 │   │       │   ├── resume.css          第 3 屏简历树
 │   │       │   └── footer.css          第 4 屏页脚小猫
 │   │       └── blog/
@@ -37,12 +37,13 @@ MoHanFox.github.io/
 │   │           └── giscus.css          评论区样式（未启用评论时不加载）
 │   ├── data/
 │   │   ├── resume.json                 ★ 简历树数据源，改这个文件即可更新简历
-│   │   └── demo-issues.json            ★ 本地 UI 检验用的演示数据（假文章，见第五节）
+│   │   ├── demo-issues.json            ★ 本地 UI 检验用的演示数据（假文章，见第五节）
+│   │   ├── lang-chart.html             语言分布 SVG 片段（构建生成，提交以作失败兜底）
+│   │   └── lang-chart.json             语言字节数原始数据（构建生成，便于排查）
 │   ├── js/
 │   │   ├── navbar.js                   通用导航栏（自动推导资源前缀 + 当前页高亮）
 │   │   ├── hero.js                     首屏打字机 + 滚动入场
 │   │   ├── resume.js                   读取 resume.json 并渲染简历树
-│   │   ├── stats.js                    GitHub 统计图表（含超时/失败降级）
 │   │   ├── toc.js                      文章页章节导航的滚动高亮
 │   │   └── blog-sidebar.js             首页分类侧栏：展开/收起 + 筛选
 │   ├── templates/
@@ -68,7 +69,10 @@ MoHanFox.github.io/
 ├── scripts/
 │   ├── build-issues.mjs                抓取带 blog 标签的 Issue → issues.json
 │   ├── markdown.mjs                    md → HTML（marked；原始 HTML 会被转义）
-│   └── build-blog.mjs                  issues.json → 列表页 + 各文章页
+│   ├── build-blog.mjs                  issues.json → 列表页 + 各文章页
+│   ├── lang-chart.mjs                  语言分布方块城市的渲染（纯函数，数据 → SVG）
+│   ├── build-lang-chart.mjs            查 GitHub 官方 API → lang-chart.html/json
+│   └── build-home.mjs                  把上面生成的片段注入 index.html（幂等）
 │
 └── .github/workflows/
     └── blog.yml                        issue → JSON → 页面 → gh-pages 的自动部署管线
@@ -85,14 +89,44 @@ MoHanFox.github.io/
 - 打字效果：主标题逐字出现 → 子标题接着逐字出现 → 结束后子标题末尾的 `_` 光标持续闪烁（`heroBlink` 动画）；
 - 系统开启「减弱动态效果」时，文字直接完整显示，不做逐字动画。
 
-### 2. GitHub 数据面板
+### 2. GitHub 数据面板（语言分布方块城市）
 
-- **3D 语言维度**：`github-readme-stats` 的 top-langs 卡片；
-- **2D 活跃维度**：`github-readme-stats` 总览卡 + `streak-stats` 连续贡献卡。
+第 2 屏只有**一块**内容：语言分布，渲染成一片**等距方块城市**。
 
-> **重要已知限制**：这些公共统计服务在中国大陆网络下经常超时或被拦截。
-> `stats.js` 因此对每张图都做了降级：8 秒超时或加载失败时，换成一张中文提示卡片（附「前往 github.com/MoHanFox 查看」与「重试」按钮），**不会**出现布局塌陷或控制台报错。
-> 想彻底解决，可把 `stats.js` 顶部的 `CONFIG.readmeStatsBase` / `CONFIG.streakBase` 换成自建实例（例如自己部署一份 github-readme-stats）。
+| 设计点 | 说明 |
+|---|---|
+| 同高方块 | 所有方块**高度相同**，语言占比体现在**方块数量**上（对齐参考图 `gofurry/night-rainbow` 的观感） |
+| 城市感 | 方块地面占地缩到 0.76，块间留出「街道」缝隙；否则所有方块会贴合成一整块板 |
+| 配色 | **不用彩虹**：全部由站点主色 `#2d6bef` 派生，同色系深浅，与主页其它板块统一 |
+| 立体感 | 每块画三个面（顶 / 左 / 右），固定光照方向 |
+| 数值 | 放在图外的图例里（等距斜面上的字很难读） |
+
+**数据来源与渲染时机**（这是关键设计）：
+
+- 数据来自 **GitHub 官方 API**（`/users/{owner}/repos` + 每个仓库的 `/languages`，后者给出精确字节数）；
+- 但查询发生在 **Actions 构建时**，不在浏览器里：
+  | 方式 | 配额 | 谁消耗 |
+  |---|---|---|
+  | 客户端实时查（未认证） | **60 次/小时/IP** | 访客，且共享 IP 会互相挤掉 |
+  | Actions 构建时查（内置 token） | **1000 次/小时/仓库** | 构建一次，访客零消耗 |
+- 生成的 SVG 由 `scripts/build-home.mjs` 注入 `index.html` 的 `LANG_CHART_START/END` 标记之间，
+  所以**访客打开页面时零请求、零配额消耗**，还能被 CDN 缓存。
+
+**构建链路**：
+
+```bash
+node scripts/build-lang-chart.mjs    # 查 API → assets/data/lang-chart.html + lang-chart.json
+node scripts/build-home.mjs          # 注入 index.html 标记之间（幂等）
+```
+
+- `build-lang-chart.mjs` 支持 `--from-file`（离线）、`--token`、`--out`；未认证时仅 60 次/小时，仓库多会失败，所以 Actions 里必须带 `GITHUB_TOKEN`；
+- 单仓库 `/languages` 失败会退回按 `size` 估算，不会让整张图失败；仓库超过 60 个则整体改用估算，避免打满配额；
+- **容错**：产物 `assets/data/lang-chart.html` 提交进仓库，生成步骤失败时脚本非零退出且**不覆盖**它，
+  注入仍拿到上一版可用片段，首页不会缺板块，同时日志会明确报错。
+
+> **历史背景**：早先用的是 `github-readme-stats` 与 `streak-stats` 的公共实例。
+> 但官方 Vercel 公共实例已被作者**主动暂停**（[anuraghazra/github-readme-stats#4661](https://github.com/anuraghazra/github-readme-stats/issues/4661)，连根路径都返回 503），
+> 同类镜像要么返回空图、要么没配 token 直接报错。因此改为自绘 + 官方 API，彻底不再依赖第三方统计服务。
 
 ### 3. 个人简历树
 

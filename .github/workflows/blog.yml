@@ -106,6 +106,21 @@ jobs:
         # 正文 Markdown 在构建时渲染；issue 的 title/tags 等字段一律转义后才进模板。
         run: node scripts/build-blog.mjs
 
+      - name: Build language chart (GitHub API → isometric SVG)
+        # 首页的语言分布方块城市。用官方 API 在这里查一次并生成静态 SVG，
+        # 访客打开页面时零请求、零配额消耗 —— 未认证的 60 次/小时是按访客 IP 算的，
+        # 放浏览器里迟早会被限流。
+        #
+        # 容错方式：产物 assets/data/lang-chart.html 是**提交进仓库**的，
+        # 本步失败时脚本非零退出且不覆盖它，下面注入拿到的仍是上一版可用片段，
+        # 首页不会缺板块；同时日志里会明确报错，不会被静默吞掉。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/build-lang-chart.mjs
+
+      - name: Inject language chart into index.html
+        run: node scripts/build-home.mjs
+
       - name: Stage static site into _site
         shell: bash
         run: |
