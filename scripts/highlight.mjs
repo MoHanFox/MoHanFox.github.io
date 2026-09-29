@@ -1,0 +1,203 @@
+/**
+ * highlight.mjs — 构建时的极简语法高亮
+ *
+ * 为什么自己写而不是装 highlight.js / prismjs：
+ *   · 那类库压缩后仍有 30–100 KB，而本站只用到 go / java 少数几种语言；
+ *   · 本站是高亮需求很轻的场景（关键词、字符串、注释、数字、函数名），
+ *     一个正则 tokenizer 就够，且零依赖、零体积、结果可复现。
+ *   · 构建时产出静态 HTML，访客不需要下载任何高亮脚本。
+ *
+ * 设计要点：
+ *   · **单次扫描**（一个组合正则从左到右推进），不是「先替换字符串、再替换关键词」——
+ *     后者会把字符串/注释里的关键词也高亮掉，是这类代码最常见的 bug。
+ *   · **语言无关**：词法规则通用（注释/字符串/数字/标识符/运算符），
+ *     只有「哪些词算关键词」按语言查表。
+ *   · **绝不改变代码内容**：输出与输入除标签外逐字符相同，格式（含缩进与空行）原样保留，
+ *     这样复制粘贴代码不会坏。渲染后有测试逐字符比对来保证这一点。
+ *   · 输入是 **marked 已转义过的文本**（`<` 已变 `&lt;`），所以先解码、再高亮、再统一转义。
+ */
+
+const ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+/** 转义 HTML（与 markdown.mjs 的策略一致） */
+function esc(text) {
+    return String(text).replace(/[&<>"']/g, (ch) => ESCAPE_MAP[ch]);
+}
+
+/** 把 marked 转义过的文本还原成原始代码（只解一次，再统一转义，避免 &amp;lt; 这类双重转义） */
+function decodeEntities(text) {
+    return String(text)
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#0*39;/g, "'")
+        .replace(/&apos;/g, "'")
+        .replace(/&amp;/g, '&');
+}
+
+/** 语言别名 -> 关键词表的键 */
+const LANG_ALIAS = {
+    js: 'javascript', jsx: 'javascript', mjs: 'javascript', cjs: 'javascript',
+    node: 'javascript',
+    golang: 'go',
+    ts: 'typescript', tsx: 'typescript',
+    py: 'python', python3: 'python',
+    cs: 'csharp', 'c#': 'csharp', dotnet: 'csharp',
+    'c++': 'cpp', cxx: 'cpp', cc: 'cpp',
+    sh: 'shell', bash: 'shell', zsh: 'shell', console: 'shell',
+    yml: 'yaml',
+    html5: 'html',
+    h: 'c', header: 'c'
+};
+
+/**
+ * 各语言的关键词 / 类型 / 字面量。
+ * 宁可少列也不要多列：漏标只是少个颜色，误标会把普通变量名染色，更难看。
+ */
+const KEYWORDS = {
+    go: `break case chan const continue default defer else fallthrough for func go goto
+         if import interface map package range return select struct switch type var`,
+    java: `abstract assert break case catch class const continue default do else enum extends
+           final finally for goto if implements import instanceof interface native new package
+           private protected public return static strictfp super switch synchronized this throw
+           throws transient try volatile while var record sealed permits yield`,
+    javascript: `async await break case catch class const continue debugger default delete do else
+                 export extends finally for function if import in instanceof let new of return
+                 static super switch this throw try typeof var void while with yield`,
+    typescript: `abstract any as asserts async await break case catch class const continue declare
+                 default delete do else enum export extends finally for from function get if
+                 implements import in infer instanceof interface is keyof let module namespace
+                 new of private protected public readonly return satisfies set static super switch
+                 this throw try type typeof var void while yield`,
+    python: `and as assert async await break class continue def del elif else except finally for
+             from global if import in is lambda nonlocal not or pass raise return try while with yield`,
+    csharp: `abstract as base bool break byte case catch char checked class const continue decimal
+             default delegate do double else enum event explicit extern false finally fixed float for
+             foreach goto if implicit in int interface internal is lock long namespace new null
+             object operator out override params private protected public readonly ref return sbyte
+             sealed short sizeof stackalloc static string struct switch this throw true try typeof
+             uint ulong unchecked unsafe ushort using virtual void volatile while var async await
+             record`,
+    cpp: `alignas alignof auto bool break case catch char class const constexpr continue decltype
+          default delete do double else enum explicit export extern false float for friend goto if
+          inline int long mutable namespace new noexcept nullptr operator private protected public
+          register return short signed sizeof static struct switch template this throw true try
+          typedef typeid typename union unsigned using virtual void volatile while`,
+    c: `auto break case char const continue default do double else enum extern float for goto if
+        inline int long register restrict return short signed sizeof static struct switch typedef
+          union unsigned void volatile while`,
+    rust: `as async await break const continue crate dyn else enum extern false fn for if impl in
+           let loop match mod move mut pub ref return self Self static struct super trait true type
+           unsafe use where while`,
+    shell: `case do done elif else esac fi for function if in local return select then time until
+            while export readonly`,
+    sql: `select from where insert into values update set delete create table drop alter index view
+          join inner left right outer on group by having order limit offset as and or not null
+          primary key foreign references distinct count sum avg min max`,
+    yaml: `true false null yes no on off`,
+    json: `true false null`
+};
+
+/** Go 的内建类型不是关键字，但值得单独染色 */
+const TYPES = {
+    go: `bool byte complex64 complex128 error float32 float64 int int8 int16 int32 int64 rune
+         string uint uint8 uint16 uint32 uint64 uintptr any comparable`,
+    java: `boolean byte char double float int long short String Integer Long Double Boolean
+           Character Object List Map Set ArrayList HashMap`,
+    csharp: `bool byte char decimal double float int long object sbyte short string uint ulong
+             ushort void var dynamic`,
+    javascript: `Array Boolean Date Error Function JSON Map Math Number Object Promise Proxy RegExp
+                 Set String Symbol WeakMap WeakSet BigInt`,
+    typescript: `Array Boolean Date Error Function JSON Map Math Number Object Promise RegExp Set
+                 String Symbol BigInt Record Partial Readonly Pick Omit`,
+    python: `bool bytes dict float frozenset int list object set str tuple type`,
+    cpp: `bool char double float int long short size_t string vector map set unsigned void`,
+    c: `bool char double float int long short size_t unsigned void`
+};
+
+/** 把模板字符串形式的词表拆成 Set */
+function toSet(source) {
+    const set = new Set();
+    String(source || '')
+        .split(/\s+/)
+        .map((word) => word.trim())
+        .filter(Boolean)
+        .forEach((word) => set.add(word));
+    return set;
+}
+
+const KEYWORD_SETS = {};
+Object.keys(KEYWORDS).forEach((lang) => { KEYWORD_SETS[lang] = toSet(KEYWORDS[lang]); });
+const TYPE_SETS = {};
+Object.keys(TYPES).forEach((lang) => { TYPE_SETS[lang] = toSet(TYPES[lang]); });
+
+/** 归一化语言名 */
+export function normalizeLang(lang) {
+    const raw = String(lang || '').trim().toLowerCase();
+    if (!raw) return '';
+    return LANG_ALIAS[raw] || raw;
+}
+
+/** 支持高亮的语言（用于判断是否值得包 span，未支持的语言直接原样转义输出） */
+export function isSupported(lang) {
+    const key = normalizeLang(lang);
+    return Boolean(KEYWORD_SETS[key] || TYPE_SETS[key]);
+}
+
+/** 单次扫描用的组合正则。顺序很重要：注释必须在运算符之前，否则 // 会被当成除号 */
+const TOKEN_RE = new RegExp([
+    '(?<comment>\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/|#[^\\n]*)',
+    '(?<triple>"{{3}|\\\'{{3}})',
+    '(?<string>"(?:\\\\.|[^"\\\\\\n])*"|\\\'(?:\\\\.|[^\\\'\\\\\\n])*\\\'|`(?:\\\\.|[^`\\\\])*`)',
+    '(?<number>\\b(?:0[xXbBoO][0-9a-fA-F_]+|\\d[\\d_]*(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)\\b)',
+    '(?<ident>[A-Za-z_$][A-Za-z0-9_$]*)',
+    '(?<op>=>|->|::|==|!=|<=|>=|&&|\\|\\||\\+\\+|--|[-+*/%=<>!&|^~?:.]+)',
+    '(?<punct>[{}()\\[\\];,])',
+    '(?<space>\\s+)',
+    '(?<other>[\\s\\S])'
+].join('|'), 'g');
+
+/**
+ * 给一段代码加高亮，返回 HTML。
+ * @param {string} code marked 转义过的代码文本
+ * @param {string} lang 语言标识（可空）
+ * @returns {string} HTML；未支持的语言返回原样转义的内容，不加任何 span
+ */
+export function highlightCode(code, lang) {
+    const source = decodeEntities(code);
+    const key = normalizeLang(lang);
+    const keywords = KEYWORD_SETS[key] || null;
+    const types = TYPE_SETS[key] || null;
+
+    // 未知语言：不做高亮，但仍要正确转义
+    if (!keywords && !types) return esc(source);
+
+    let out = '';
+    TOKEN_RE.lastIndex = 0;
+    let match;
+
+    while ((match = TOKEN_RE.exec(source)) !== null) {
+        const g = match.groups || {};
+        const raw = match[0];
+
+        if (g.comment) {
+            out += `<span class="tok-comment">${esc(raw)}</span>`;
+        } else if (g.triple) {
+            // 三引号字符串（Python 等）：多数场景当成字符串处理即可
+            out += `<span class="tok-string">${esc(raw)}</span>`;
+        } else if (g.string) {
+            out += `<span class="tok-string">${esc(raw)}</span>`;
+        } else if (g.number) {
+            out += `<span class="tok-number">${esc(raw)}</span>`;
+        } else if (g.ident) {
+            if (keywords.has(raw)) out += `<span class="tok-keyword">${esc(raw)}</span>`;
+            else if (types.has(raw)) out += `<span class="tok-type">${esc(raw)}</span>`;
+            else out += esc(raw);
+        } else {
+            // 运算符、标点、空白、其它：原样输出（已转义）
+            out += esc(raw);
+        }
+    }
+
+    return out;
+}
