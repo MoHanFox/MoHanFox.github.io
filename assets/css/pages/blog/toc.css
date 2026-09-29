@@ -56,7 +56,9 @@
     transition: color 0.2s ease;
 }
 
-/* 刻度：短横线，就是需求里的 `-`，颜色与字号无关，保证各层级对齐 */
+/* 刻度：短横线，就是需求里的 `-`。
+   层级区分主要靠**刻度本身**：越深的编号越短、越淡、越细，
+   再配合标签缩进与字号 —— 只靠缩进的话，隔一两级就看不出从属关系了。 */
 .blog-toc-tick {
     position: absolute;
     left: 0;
@@ -67,6 +69,30 @@
     background: var(--color-border);
     transform: translateY(-50%);
     transition: background 0.2s ease, width 0.2s ease;
+}
+
+/* 未激活时按层级给刻度不同深浅（用 color-mix 从 ink 往 border 调） */
+.blog-toc-item--2 .blog-toc-tick {
+    background: color-mix(in srgb, var(--color-ink) 42%, var(--color-border));
+}
+
+.blog-toc-item--3 .blog-toc-tick {
+    width: 9px;
+    background: color-mix(in srgb, var(--color-ink) 26%, var(--color-border));
+}
+
+.blog-toc-item--4 .blog-toc-tick {
+    width: 7px;
+    background: color-mix(in srgb, var(--color-ink) 14%, var(--color-border));
+}
+
+.blog-toc-item--5 .blog-toc-tick,
+.blog-toc-item--6 .blog-toc-tick {
+    width: 5px;
+    /* 4 级以下只留一个色点，避免出现一条看不清的细线 */
+    height: 3px;
+    border-radius: 50%;
+    background: var(--color-border);
 }
 
 .blog-toc-label {
@@ -84,14 +110,33 @@
     background: var(--color-muted);
 }
 
+/* 激活项：颜色与字重统一切换到主色；刻度长度按层级递增，
+   这样即使同级缩进不同，也能一眼看出「当前在哪一级」 */
 .blog-toc-link.is-active {
     color: var(--color-primary);
     font-family: var(--font-medium);
 }
 
 .blog-toc-link.is-active .blog-toc-tick {
-    width: 15px;
     background: var(--color-primary);
+    width: 15px;
+}
+
+.blog-toc-item--3 .blog-toc-link.is-active .blog-toc-tick {
+    width: 14px;
+}
+
+.blog-toc-item--4 .blog-toc-link.is-active .blog-toc-tick {
+    width: 12px;
+    height: 2px;
+    border-radius: 1px;
+}
+
+.blog-toc-item--5 .blog-toc-link.is-active .blog-toc-tick,
+.blog-toc-item--6 .blog-toc-link.is-active .blog-toc-tick {
+    width: 9px;
+    height: 3px;
+    border-radius: 50%;
 }
 
 /* 层级缩进：标签右移，刻度不动 */
@@ -100,23 +145,29 @@
     font-size: 12.5px;
 }
 
-.blog-toc-item--4 .blog-toc-link,
-.blog-toc-item--5 .blog-toc-link,
-.blog-toc-item--6 .blog-toc-link {
+.blog-toc-item--4 .blog-toc-link {
     padding-left: 42px;
     font-size: 12px;
 }
 
+.blog-toc-item--5 .blog-toc-link,
+.blog-toc-item--6 .blog-toc-link {
+    padding-left: 52px;
+    font-size: 11.5px;
+    /* 太深的内容再压一档灰度，避免和 4 级混在一起 */
+    opacity: 0.85;
+}
+
 /* ---------- 宽屏：固定在屏幕右中，永远可见 ----------
-   占的是页面右侧的空白区：正文只要让出「栏宽 + 间距」即可，所以 1220px 就能放下
-   （正文容器 860px + 栏 200px + 两侧间距）。 */
-@media (min-width: 1220px) {
+   占的是页面右侧的空白区：正文让出「栏宽 + 间距」即可。
+   正文容器 1000px + 右侧让位 268px + 两侧间距 → 1380px 起才放得下。 */
+@media (min-width: 1380px) {
     .blog-toc {
         display: block;
         position: fixed;
         top: 50%;
         right: 30px;
-        width: 200px;
+        width: 216px;
         /* 目录比视口高时自身滚动，避免溢出被裁掉 */
         max-height: 68vh;
         overflow-y: auto;
@@ -126,7 +177,7 @@
 
     /* 给正文让出右侧固定栏，保证正文仍在视口内水平居中 */
     body.page-blog .blog-wrap {
-        padding-right: 240px;
+        padding-right: 268px;
     }
 
     /* 固定在右中时贯穿竖线会拉满整栏、显得突兀；刻度本身已能表达层级 */
@@ -137,12 +188,12 @@
 
 /* ---------- 较窄：无法固定时改为贴在正文上方（随页面滚动） ----------
    用与 .blog-wrap 相同的内边距与最大宽度，保证和正文左右对齐。 */
-@media (max-width: 1219px) {
+@media (max-width: 1379px) {
     .blog-toc {
         display: block;
         box-sizing: border-box;
         width: 100%;
-        max-width: 860px;
+        max-width: 1000px;
         margin: 0 auto;
         padding: 76px 28px 0;
     }
@@ -152,14 +203,18 @@
         display: none;
     }
 
+    /* 贴在上方时不紧凑，缩进按比例收一点，避免深层级把标签挤没 */
     .blog-toc-item--3 .blog-toc-link {
         padding-left: 26px;
     }
 
-    .blog-toc-item--4 .blog-toc-link,
+    .blog-toc-item--4 .blog-toc-link {
+        padding-left: 36px;
+    }
+
     .blog-toc-item--5 .blog-toc-link,
     .blog-toc-item--6 .blog-toc-link {
-        padding-left: 34px;
+        padding-left: 46px;
     }
 
     /* 上方已经被目录占掉内边距，正文就不必再留顶部空间 */
