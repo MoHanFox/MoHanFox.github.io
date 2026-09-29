@@ -65,12 +65,12 @@
 <li>为你的项目装载以上模块</li>
 <li>本项目以<strong>自定义的Go控制台模拟前端</strong> + <strong>Go后端</strong>为示例进行</li>
 </ol>
-<pre><code class="language-go.mod">require (
-	github.com/gin-contrib/cors v1.7.9          //官方的Cors，本章节也会提供定制Cors
-	github.com/gin-gonic/gin v1.12.0
-	github.com/spf13/viper v1.21.0
-	gorm.io/driver/mysql v1.6.0
-	gorm.io/gorm v1.31.2
+<pre><code class="language-go.mod"><span class="tok-fn">require</span> (
+	<span class="tok-fn">github</span>.com/gin-contrib/cors v1.<span class="tok-number">7.9</span>          <span class="tok-comment">//官方的Cors，本章节也会提供定制Cors</span>
+	<span class="tok-fn">github</span>.com/gin-gonic/gin v1.<span class="tok-number">12.0</span>
+	<span class="tok-fn">github</span>.com/spf13/viper v1.<span class="tok-number">21.0</span>
+	<span class="tok-fn">gorm</span>.io/driver/mysql v1.<span class="tok-number">6.0</span>
+	<span class="tok-fn">gorm</span>.io/gorm v1.<span class="tok-number">31.2</span>
 )</code></pre>
 <ol start="3">
 <li>开始编写你的简易后端</li>
@@ -80,18 +80,18 @@
 <ol>
 <li>创建你的第一个 Gin 应用</li>
 </ol>
-<pre><code class="language-mian.go">package main
+<pre><code class="language-mian.go"><span class="tok-keyword">package</span> main
 
-import &quot;github.com/gin-gonic/gin&quot;
+<span class="tok-keyword">import</span> <span class="tok-string">&quot;github.com/gin-gonic/gin&quot;</span>
 
-func main() {
-  router := gin.Default()
-  router.GET(&quot;/ping&quot;, func(c *gin.Context) {
-    c.JSON(200, gin.H{
-      &quot;message&quot;: &quot;pong&quot;,
+<span class="tok-keyword">func</span> <span class="tok-fn">main</span>() {
+  router := <span class="tok-fn">gin</span>.<span class="tok-fn">Default</span>()
+  <span class="tok-fn">router</span>.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/ping&quot;</span>, <span class="tok-fn">func</span>(c *<span class="tok-fn">gin</span>.Context) {
+    <span class="tok-fn">c</span>.<span class="tok-fn">JSON</span>(<span class="tok-number">200</span>, <span class="tok-fn">gin</span>.H{
+      <span class="tok-string">&quot;message&quot;</span>: <span class="tok-string">&quot;pong&quot;</span>,
     })
   })
-  router.Run() // listens on 0.0.0.0:8080 by default
+  <span class="tok-fn">router</span>.<span class="tok-fn">Run</span>() <span class="tok-comment">// listens on 0.0.0.0:8080 by default</span>
 }</code></pre>
 <p>使用以下命令启动服务器：</p>
 <pre><code>go run main.go</code></pre>
