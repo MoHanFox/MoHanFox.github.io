@@ -1,32 +1,37 @@
 /**
  * build-home.mjs — 把构建产物注入首页 index.html
  *
- * 首页里有一段「生成物区域」，用两个标记括起来：
+ * 首页里有若干「生成物区域」，各用两个标记括起来：
  *     <!-- LANG_CHART_START -->
  *     ...构建时替换...
  *     <!-- LANG_CHART_END -->
- * 本脚本把 scripts/build-lang-chart.mjs 产出的片段填进去。
+ *     <!-- ACTIVITY_CARD_START -->
+ *     ...
+ *     <!-- ACTIVITY_CARD_END -->
+ * 本脚本把对应片段填进去。
  *
  * 为什么用标记而不是 {{TOKEN}}：
  *   index.html 是要长期手工编辑的源文件，标记形式在编辑器里一眼能看出
  *   「这块是机器写的，别手改」，也不会和模板语法混淆。
  *
  * 用法：
- *   node scripts/build-home.mjs                        # 用默认输入
- *   node scripts/build-home.mjs --chart x.html --out index.html
- *   node scripts/build-home.mjs --check                # 只检查标记是否存在，不写文件
+ *   node scripts/build-home.mjs            # 注入全部已配置的区域
+ *   node scripts/build-home.mjs --check    # 只检查标记是否存在，不写文件
  *
  * 幂等：重复执行结果一致（标记保留，只换中间内容）。
+ * 某个片段文件不存在时**跳过该区域并保留原内容**，不会把页面挖空。
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const START = '<!-- LANG_CHART_START -->';
-const END = '<!-- LANG_CHART_END -->';
+/** 区域的唯一来源：加新板块只要在这里加一条 */
+export const SECTIONS = [
+    { name: '语言分布', start: '<!-- LANG_CHART_START -->', end: '<!-- LANG_CHART_END -->', file: 'assets/data/lang-chart.html' },
+    { name: '账号活跃', start: '<!-- ACTIVITY_CARD_START -->', end: '<!-- ACTIVITY_CARD_END -->', file: 'assets/data/activity-card.html' }
+];
 
-const DEFAULT_CHART = 'assets/data/lang-chart.html';
 const DEFAULT_OUT = 'index.html';
 
 export function parseArgs(argv) {
@@ -48,21 +53,21 @@ export function parseArgs(argv) {
 
 /**
  * 把片段注入到两个标记之间。
- * 找不到标记时抛错而不是静默跳过 —— 否则页面会悄悄少了整整一个板块。
+ * 找不到标记时抛错而不是静默跳过 —— 否则页面会悄悄少掉整整一个板块。
  */
-export function injectSection(html, fragment, label) {
+export function injectSection(html, fragment, start, end, label) {
     const name = label || 'index.html';
-    const start = html.indexOf(START);
-    const end = html.indexOf(END);
-    if (start < 0 || end < 0) {
-        throw new Error(`${name} 里找不到标记 ${START} / ${END}`);
+    const startAt = html.indexOf(start);
+    const endAt = html.indexOf(end);
+    if (startAt < 0 || endAt < 0) {
+        throw new Error(`${name} 里找不到标记 ${start} / ${end}`);
     }
-    if (end < start) {
-        throw new Error(`${name} 里标记顺序反了：${END} 出现在 ${START} 之前`);
+    if (endAt < startAt) {
+        throw new Error(`${name} 里标记顺序反了：${end} 出现在 ${start} 之前`);
     }
 
-    const before = html.slice(0, start + START.length);
-    const after = html.slice(end);
+    const before = html.slice(0, startAt + start.length);
+    const after = html.slice(endAt);
 
     // 片段自身缩进到与标记同级，保持文件整洁
     const indent = ' '.repeat(20);
@@ -78,34 +83,51 @@ export function injectSection(html, fragment, label) {
 function main() {
     const args = parseArgs(process.argv.slice(2));
     const outPath = resolve(String(args.out || DEFAULT_OUT));
-    const chartPath = resolve(String(args.chart || DEFAULT_CHART));
 
     if (!existsSync(outPath)) {
         throw new Error(`找不到 ${outPath}`);
     }
-    const html = readFileSync(outPath, 'utf8');
+    let html = readFileSync(outPath, 'utf8');
 
     if (args.check) {
-        if (html.indexOf(START) < 0 || html.indexOf(END) < 0) {
-            throw new Error(`检查失败：${outPath} 缺少 ${START} / ${END} 标记`);
+        const missing = SECTIONS.filter((section) =>
+            html.indexOf(section.start) < 0 || html.indexOf(section.end) < 0);
+        if (missing.length) {
+            throw new Error(`检查失败：${outPath} 缺少标记 → ` +
+                missing.map((s) => `${s.name}(${s.start})`).join(', '));
         }
-        console.log(`[build-home] 标记检查通过：${outPath}`);
+        console.log(`[build-home] 标记检查通过：${outPath}（${SECTIONS.length} 个区域）`);
         return;
     }
 
-    if (!existsSync(chartPath)) {
-        throw new Error(
-            `找不到语言分布片段 ${chartPath}；请先运行 node scripts/build-lang-chart.mjs`);
-    }
-    const fragment = readFileSync(chartPath, 'utf8');
+    let changed = 0;
+    let skipped = 0;
 
-    const next = injectSection(html, fragment, outPath);
-    if (next === html) {
-        console.log('[build-home] 内容无变化，跳过写入');
-        return;
+    SECTIONS.forEach((section) => {
+        const chartPath = resolve(section.file);
+        if (!existsSync(chartPath)) {
+            // 产物不存在就原样保留：宁可留上一版内容，也不要把板块挖空
+            console.log(`[build-home] 跳过「${section.name}」：找不到 ${section.file}`);
+            skipped += 1;
+            return;
+        }
+        const fragment = readFileSync(chartPath, 'utf8');
+        const next = injectSection(html, fragment, section.start, section.end, outPath);
+        if (next === html) {
+            console.log(`[build-home] 「${section.name}」内容无变化`);
+        } else {
+            html = next;
+            changed += 1;
+            console.log(`[build-home] 已注入「${section.name}」（${fragment.length} 字节）`);
+        }
+    });
+
+    if (changed > 0) {
+        writeFileSync(outPath, html, 'utf8');
+        console.log(`[build-home] 已写入 ${outPath}（更新 ${changed} 个区域，跳过 ${skipped} 个）`);
+    } else {
+        console.log(`[build-home] 无需写入（更新 0 个区域，跳过 ${skipped} 个）`);
     }
-    writeFileSync(outPath, next, 'utf8');
-    console.log(`[build-home] 已注入语言分布 → ${outPath}（${fragment.length} 字节片段）`);
 }
 
 const isDirectRun = process.argv[1]

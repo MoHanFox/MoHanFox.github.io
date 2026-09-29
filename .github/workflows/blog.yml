@@ -118,7 +118,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/build-lang-chart.mjs
 
-      - name: Inject language chart into index.html
+      - name: Build activity card (streak-stats → inline SVG)
+        # 账号活跃卡片。同样在构建时抓取并内联，访客零请求。
+        # 容错方式与语言分布一致：产物提交进仓库，失败时不覆盖、不写坏内容。
+        run: node scripts/build-activity-card.mjs
+
+      - name: Inject built sections into index.html
         run: node scripts/build-home.mjs
 
       - name: Stage static site into _site

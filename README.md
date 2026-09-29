@@ -39,6 +39,7 @@ MoHanFox.github.io/
 │   │   ├── resume.json                 ★ 简历树数据源，改这个文件即可更新简历
 │   │   ├── demo-issues.json            ★ 本地 UI 检验用的演示数据（假文章，见第五节）
 │   │   ├── lang-chart.html             语言分布 SVG 片段（构建生成，提交以作失败兜底）
+│   │   ├── activity-card.html          账号活跃 SVG 片段（同上）
 │   │   └── lang-chart.json             语言字节数原始数据（构建生成，便于排查）
 │   ├── js/
 │   │   ├── navbar.js                   通用导航栏（自动推导资源前缀 + 当前页高亮）
@@ -70,8 +71,9 @@ MoHanFox.github.io/
 │   ├── build-issues.mjs                抓取带 blog 标签的 Issue → issues.json
 │   ├── markdown.mjs                    md → HTML（marked；原始 HTML 会被转义）
 │   ├── build-blog.mjs                  issues.json → 列表页 + 各文章页
-│   ├── lang-chart.mjs                  语言分布方块城市的渲染（纯函数，数据 → SVG）
+│   ├── lang-chart.mjs                  等距方块城市 + 圆环图的渲染（纯函数，数据 → SVG）
 │   ├── build-lang-chart.mjs            查 GitHub 官方 API → lang-chart.html/json
+│   ├── build-activity-card.mjs         抓 streak-stats → activity-card.html
 │   └── build-home.mjs                  把上面生成的片段注入 index.html（幂等）
 │
 └── .github/workflows/
@@ -89,44 +91,67 @@ MoHanFox.github.io/
 - 打字效果：主标题逐字出现 → 子标题接着逐字出现 → 结束后子标题末尾的 `_` 光标持续闪烁（`heroBlink` 动画）；
 - 系统开启「减弱动态效果」时，文字直接完整显示，不做逐字动画。
 
-### 2. GitHub 数据面板（语言分布方块城市）
+### 2. GitHub 数据面板
 
-第 2 屏只有**一块**内容：语言分布，渲染成一片**等距方块城市**。
+两个板块：
 
-| 设计点 | 说明 |
+| 板块 | 内容 |
 |---|---|
-| 同高方块 | 所有方块**高度相同**，语言占比体现在**方块数量**上（对齐参考图 `gofurry/night-rainbow` 的观感） |
-| 城市感 | 方块地面占地缩到 0.76，块间留出「街道」缝隙；否则所有方块会贴合成一整块板 |
-| 配色 | **不用彩虹**：全部由站点主色 `#2d6bef` 派生，同色系深浅，与主页其它板块统一 |
-| 立体感 | 每块画三个面（顶 / 左 / 右），固定光照方向 |
-| 数值 | 放在图外的图例里（等距斜面上的字很难读） |
+| **01 语言分布** | 左边等距「方块城市」，右边二维圆环占比图 + 图例 |
+| **02 账号活跃** | streak-stats 的贡献日历与连续天数卡片 |
 
-**数据来源与渲染时机**（这是关键设计）：
+#### 01 语言分布
 
-- 数据来自 **GitHub 官方 API**（`/users/{owner}/repos` + 每个仓库的 `/languages`，后者给出精确字节数）；
-- 但查询发生在 **Actions 构建时**，不在浏览器里：
-  | 方式 | 配额 | 谁消耗 |
-  |---|---|---|
-  | 客户端实时查（未认证） | **60 次/小时/IP** | 访客，且共享 IP 会互相挤掉 |
-  | Actions 构建时查（内置 token） | **1000 次/小时/仓库** | 构建一次，访客零消耗 |
-- 生成的 SVG 由 `scripts/build-home.mjs` 注入 `index.html` 的 `LANG_CHART_START/END` 标记之间，
+- **左栏 · 方块城市**：每种语言占若干个**独立的长条立方体**，每个立方体是**一个整体**
+  （不是几个正方体叠起来），**方块高度由该语言的占比决定**；
+- **右栏 · 圆环占比图** + 图例（色块 + 语言名 + 占比）。两栏配色一致，可以互相对照；
+- **主流与长尾**：前 5 种语言各自成组，其余归入长尾，但**长尾里每一项仍是各自独立的方块**，
+  不会合并成一个 `other` 方块；长尾统一取最浅的一档颜色；
+- **配色不用彩虹**：全部由站点主色 `#2d6bef` 派生的同色系，按占比降序由深到浅
+  —— 亮度本身就是一条可读信息；
+- **透视靠画家算法**：等距投影下屏幕位置会重叠，绘制顺序必须按网格坐标 `(a + b)` 升序
+  （该值越小离观察者越远，先画），否则远处的方块会盖住近处的，看起来"透视反了"。
+
+> ⚠️ **改这几个参数会明显影响观感**（都在 `scripts/build-lang-chart.mjs` 顶部）：
+> `CITY_BLOCK_TOTAL`（方块总数）、`CITY_COLUMNS`（网格列数）、`CITY_FOOTPRINT`（占地比例，决定街道缝隙）。
+> 方块**多而密**会糊成一整块板，**少而疏**才有城市轮廓。
+
+#### 数据来源与渲染时机（关键设计）
+
+两个板块都在 **Actions 构建时**取数并生成为静态内容，**不在浏览器里查**：
+
+| 方式 | 配额 | 谁消耗 |
+|---|---|---|
+| 客户端实时查（未认证） | **60 次/小时/IP** | 访客，且共享 IP 会互相挤掉 |
+| Actions 构建时查（内置 token） | **1000 次/小时/仓库** | 构建一次，访客零消耗 |
+
+- 语言数据来自 GitHub 官方 API（`/users/{owner}/repos` + 每个仓库的 `/languages`，后者给出精确字节数）；
+- 账号活跃来自 streak-stats 公共实例的 SVG；
+- 两者都由 `scripts/build-home.mjs` 注入 `index.html` 的标记之间，
   所以**访客打开页面时零请求、零配额消耗**，还能被 CDN 缓存。
 
 **构建链路**：
 
 ```bash
-node scripts/build-lang-chart.mjs    # 查 API → assets/data/lang-chart.html + lang-chart.json
-node scripts/build-home.mjs          # 注入 index.html 标记之间（幂等）
+node scripts/build-lang-chart.mjs      # GitHub API → assets/data/lang-chart.html
+node scripts/build-activity-card.mjs   # streak-stats → assets/data/activity-card.html
+node scripts/build-home.mjs            # 注入 index.html 的标记之间（幂等）
 ```
 
 - `build-lang-chart.mjs` 支持 `--from-file`（离线）、`--token`、`--out`；未认证时仅 60 次/小时，仓库多会失败，所以 Actions 里必须带 `GITHUB_TOKEN`；
 - 单仓库 `/languages` 失败会退回按 `size` 估算，不会让整张图失败；仓库超过 60 个则整体改用估算，避免打满配额；
-- **容错**：产物 `assets/data/lang-chart.html` 提交进仓库，生成步骤失败时脚本非零退出且**不覆盖**它，
-  注入仍拿到上一版可用片段，首页不会缺板块，同时日志会明确报错。
+- `build-activity-card.mjs` 会**校验响应确实是 SVG**，避免把第三方错误页原样内联进站点；
+- **容错**：两个产物都提交进仓库，生成步骤失败时脚本非零退出且**不覆盖**它们，
+  注入仍拿到上一版可用内容，首页不会缺板块，同时日志会明确报错；
+- **数据会随工作流刷新**：push 到 `dev`、issue 事件、手动 dispatch 都会重新取数。
+  想立刻刷新图表：**Actions → blog-pipeline → Run workflow**。
 
-> **历史背景**：早先用的是 `github-readme-stats` 与 `streak-stats` 的公共实例。
-> 但官方 Vercel 公共实例已被作者**主动暂停**（[anuraghazra/github-readme-stats#4661](https://github.com/anuraghazra/github-readme-stats/issues/4661)，连根路径都返回 503），
-> 同类镜像要么返回空图、要么没配 token 直接报错。因此改为自绘 + 官方 API，彻底不再依赖第三方统计服务。
+> **历史背景**：两个统计图原本都用 `github-readme-stats` 与 `streak-stats` 的公共实例。
+> 但 `github-readme-stats` 的官方 Vercel 实例已被作者**主动暂停**
+> （[anuraghazra/github-readme-stats#4661](https://github.com/anuraghazra/github-readme-stats/issues/4661)，连根路径都返回 503），
+> 同类镜像要么返回空图、要么没配 token 直接报错。
+> 所以语言分布改为**自绘 + GitHub 官方 API**；账号活跃因为 streak-stats 仍然可用而保留，
+> 但改成构建时抓取内联，访客不再依赖它的可达性。
 
 ### 3. 个人简历树
 
