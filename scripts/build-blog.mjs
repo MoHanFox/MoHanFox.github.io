@@ -130,13 +130,28 @@ export function renderComments(config) {
  * 文章页右侧章节导航（竖排 `-` 刻度 + 标题，点击定位、滚动高亮）。
  * 标题数与锚点 id 由 renderMarkdown 的 headingIds 提供，与正文里的 id 同源。
  * 标题少于 TOC_MIN_HEADINGS 时返回空，不显示这一栏。
+ *
+ * 层级怎么定（这里踩过坑）：
+ *   早先的规则是 Math.max(level, 2)，本意是「别让文章标题在目录里再占一级」。
+ *   但那会把 `#` 和 `##` 压成**同一级**，于是子标题看起来和父标题一样深 ——
+ *   例如正文写 `# 拓展你的接口与Rest规则` 下面跟 `## Rest规则:`，
+ *   两者在目录里都成了 2 级，从属关系完全看不出来。
+ *
+ *   正确做法：以**文章内最浅的标题**为基准。
+ *   最浅的那一级 → 目录的 2 级，往下每深一级 +1。
+ *   这样「`#` 当文章标题、`##` 当小节」的文章能正确显示缩进；
+ *   本来就用 `##`/`###` 写的文章，基准落在 `##` 上，效果与从前一致。
  */
 export function renderToc(headings) {
   const list = Array.isArray(headings) ? headings : [];
   if (list.length < TOC_MIN_HEADINGS) return { html: '', style: '', script: '' };
 
+  // 基准 = 全文最浅的标题层级；目录层级钳在 [2, 6]
+  const shallowest = Math.min(...list.map((heading) => Number(heading.level) || 1));
+
   const items = list.map((heading) => {
-    const level = Math.min(Math.max(Number(heading.level) || 1, 2), 6);
+    const raw = Number(heading.level) || 1;
+    const level = Math.min(Math.max(raw - shallowest + 2, 2), 6);
     const href = `#${encodeURIComponent(heading.id)}`;
     // 点击时阻止默认跳转并手动平滑滚动到标题上方一点，保证不被固定导航遮住
     const onclick = ` onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));` +
