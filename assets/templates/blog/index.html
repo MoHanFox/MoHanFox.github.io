@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PAGE_TITLE}}</title>
+    <meta name="description" content="{{PAGE_DESCRIPTION}}">
+
+    <!-- 全局样式：base（字体+令牌）→ components（通用组件）→ navbar（导航栏） -->
+    <link rel="stylesheet" href="../../assets/css/base.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/navbar.css">
+    <!-- 博客样式（列表页与文章页共用，保证博客内部观感一致） -->
+    <link rel="stylesheet" href="../../assets/css/pages/blog/blog.css">
+    <!-- 分类侧栏样式 -->
+    <link rel="stylesheet" href="../../assets/css/pages/blog/sidebar.css">
+</head>
+<body class="page-blog">
+
+    <div class="blog-home">
+        {{SIDEBAR}}
+
+        <main class="blog-wrap">
+            <header class="blog-head">
+                <h1 class="blog-title">博客</h1>
+                <p class="blog-lead">
+                    这里的内容全部来自本仓库的 GitHub Issues
+                </p>
+            </header>
+
+            <!-- 搜索：位于第一篇文章上方 -->
+            <div class="blog-search">
+                <div class="blog-search-box">
+                    <span class="blog-search-icon" aria-hidden="true"></span>
+                    <input class="blog-search-input" type="search" data-search-input
+                           placeholder="搜索标题、摘要或标签…" autocomplete="off"
+                           aria-label="搜索博客文章">
+                    <button class="blog-search-clear" type="button" data-search-clear
+                            aria-label="清空搜索" hidden>清空</button>
+                </div>
+                <label class="blog-search-scope">
+                    <span class="blog-search-scope-label">搜索范围</span>
+                    <select class="blog-search-select" data-search-scope
+                            aria-label="选择搜索范围">
+                        <option value="meta" selected>标题、摘要、标签</option>
+                        <option value="content">文章内关键字</option>
+                    </select>
+                </label>
+            </div>
+
+            <p class="blog-filter" data-filter-status hidden></p>
+
+            {{POSTS}}
+
+            <div class="blog-empty blog-filter-empty" data-filter-empty hidden>
+                <p class="blog-empty-title">暂无内容</p>
+                <p class="blog-empty-desc">这个分类下还没有文章。换一个分类，或点侧栏的「全部」查看所有文章。</p>
+            </div>
+
+            <p class="blog-note">
+                共 {{COUNT}} 篇 · 数据生成于 {{GENERATED_AT}} ·
+                <a href="https://github.com/{{REPO}}/issues?q=label%3Ablog" target="_blank" rel="noopener">在 GitHub 上查看全部</a>
+            </p>
+        </main>
+    </div>
+
+    <!-- 通用导航栏（本页位于 /pages/blog/，需上跳两级） -->
+    <script src="../../assets/js/navbar.js"></script>
+    <!-- 分类侧栏：展开/收起 + 前端筛选（不产生额外页面） -->
+    <script src="../../assets/js/blog-sidebar.js"></script>
+</body>
+</html>

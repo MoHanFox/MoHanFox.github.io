@@ -1,0 +1,31 @@
+{
+  "_readme": [
+    "giscus 评论配置（评论数据存在 GitHub Discussions 里，无需后端、无追踪）。",
+    "",
+    "已配齐：repo / repoId / category / categoryId 都填好了，评论区可以直接用。",
+    "  · repoId     R_kgDOUaoChQ          —— 仓库的 node_id",
+    "  · category   Blog Chat             —— Discussions 里的分类名",
+    "  · categoryId DIC_kwDOUaoChc4DGpxu  —— 该分类的 node_id（giscus 用这个）",
+    "",
+    "categoryId 的获取方式（供以后改分类时参考）：",
+    "  GitHub 的 GraphQL / giscus.app 都需要授权，匿名拿不到。",
+    "  但 REST 的 /repos/{owner}/{repo}/discussions 响应里会带讨论所属分类的 node_id ——",
+    "  所以只要目标分类下已经有任意一条讨论，就能从这里读到（只返回「有讨论的分类」）。",
+    "",
+    "注意：换分类时 category 与 categoryId 必须成对更新，写错会让 giscus 直接报错。",
+    "改成 enabled: false 即可彻底关闭评论（不加载脚本，也不加载 giscus.css）。"
+  ],
+  "enabled": true,
+  "repo": "MoHanFox/MoHanFox.github.io",
+  "repoId": "R_kgDOUaoChQ",
+  "category": "Blog Chat",
+  "categoryId": "DIC_kwDOUaoChc4DGpxu",
+  "mapping": "pathname",
+  "strict": false,
+  "reactionsEnabled": true,
+  "emitMetadata": false,
+  "inputPosition": "bottom",
+  "theme": "light",
+  "lang": "zh-CN",
+  "loading": "lazy"
+}

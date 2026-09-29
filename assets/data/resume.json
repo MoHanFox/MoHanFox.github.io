@@ -1,0 +1,81 @@
+{
+  "_readme": "简历数据源。改这个文件即可更新主页第 3 屏的简历树，无需动 HTML/CSS。字段说明见仓库 README 的「简历树定制」一节。children 支持任意层级嵌套。",
+  "profile": {
+    "name": "漠寒 MOHAN",
+    "title": "一位还在学校的学生, 热爱开发和艺术, 同时会不断接触新东西, QQ: 379749089",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/MoHanFox" },
+      { "label": "Gitee", "url": "https://gitee.com/mohanbi" },
+      { "label": "BiliBili", "url": "https://space.bilibili.com/438116463" }
+    ]
+  },
+  "timeline": [
+    {
+      "title": "教育经历",
+      "time": "2026 - 至今",
+      "desc": "正在 成都信息工程大学 学习。",
+      "children": [
+        {
+          "title": "信息安全",
+          "time": "2026 - 至今",
+          "tags": ["计算机相关"]
+        },
+        {
+          "title": "在校项目或竞赛",
+          "time": "2026 - 至今",
+          "children": [
+            {
+              "title": "暂无",
+              "time": "?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "工作 / 实习经历",
+      "time": "2027 — 至今",
+      "desc": "还没工作呢……",
+      "tags": ["争取大一下实习.."],
+      "children": [
+        {
+          "title": "加入 GoFurry 组织",
+          "time": "2026 - 至今",
+          "desc": "待发力。"
+        }
+      ]
+    },
+    {
+      "title": "项目经历",
+      "time": "持续更新",
+      "children": [
+        {
+          "title": "个人站点 MoHanFox.github.io",
+          "time": "2026",
+          "desc": "纯静态、无构建步骤的个人主页：首屏打字机、GitHub 数据面板、JSON 驱动的简历树。",
+          "tags": ["HTML", "CSS", "原生 JS", "GitHub Actions"]
+        },
+        {
+          "title": "Shina",
+          "time": "2023 - 至今",
+          "desc": "在高中时期写的视觉小说，开始于中考暑假\n丨开源见: https://gitee.com/MoHanBi/shina",
+          "tags": ["C#", "Unity"]
+        }
+      ]
+    },
+    {
+      "title": "技能",
+      "desc": "努力成为全栈工程师。",
+      "children": [
+        {
+          "title": "语言",
+          "tags": ["C#", "Java", "Go", "C/C++"]
+        },
+        {
+          "title": "工具与平台",
+          "tags": ["Unity", "Git", "JetBrains","逆向"]
+        }
+      ]
+    }
+  ]
+}

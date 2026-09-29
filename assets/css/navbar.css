@@ -1,0 +1,115 @@
+/* ============================================================
+   navbar.css — 导航栏组件（所有页面顶部）
+   结构由 assets/js/navbar.js 注入，类名与本文件一一对应
+   依赖：base.css（字体族与设计令牌）
+   ============================================================ */
+
+/* 页面内容下移，避免被 fixed 导航栏遮挡 */
+body {
+    padding-top: var(--navbar-height);
+}
+
+.halo-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--navbar-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    background: rgba(255, 255, 255, 0.85);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    z-index: 900;
+    box-sizing: border-box;
+}
+
+/* ---------- 左侧：品牌 + 首页 ---------- */
+.halo-navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.halo-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.halo-nav-brand img {
+    width: 28px;
+    height: 28px;
+}
+
+.halo-nav-brand span {
+    font-family: var(--font-bold);
+    font-size: 20px;
+    color: var(--color-ink);
+    letter-spacing: 1px;
+}
+
+/* ---------- 导航链接 ---------- */
+.halo-nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.halo-nav-link {
+    font-family: var(--font-light);
+    font-size: 14px;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: var(--ease-base);
+}
+
+.halo-nav-link:hover {
+    text-decoration: underline;
+}
+
+/* 当前页 */
+.halo-nav-link.is-active {
+    font-family: var(--font-medium);
+    color: var(--color-ink);
+    text-decoration: none;
+    cursor: default;
+}
+
+/* ---------- 窄屏：收紧间距，避免品牌与导航挤在一起 ---------- */
+@media (max-width: 480px) {
+    .halo-navbar {
+        padding: 0 16px;
+    }
+
+    .halo-navbar-left {
+        gap: 16px;
+    }
+
+    .halo-nav-menu {
+        gap: 14px;
+    }
+
+    .halo-nav-brand {
+        gap: 6px;
+    }
+
+    .halo-nav-brand img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .halo-nav-brand span {
+        font-size: 17px;
+        letter-spacing: 0;
+    }
+
+    .halo-nav-link {
+        font-size: 13px;
+    }
+}
+
