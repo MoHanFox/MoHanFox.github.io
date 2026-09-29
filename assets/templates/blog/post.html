@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PAGE_TITLE}}</title>
+    <meta name="description" content="{{PAGE_DESCRIPTION}}">
+
+    <!-- 全局样式：base（字体+令牌）→ components（通用组件）→ navbar（导航栏） -->
+    <link rel="stylesheet" href="../../assets/css/base.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/navbar.css">
+    <!-- 与列表页共用同一份博客样式 -->
+    <link rel="stylesheet" href="../../assets/css/pages/blog/blog.css">
+{{TOC_STYLE}}
+{{GISCUS_STYLE}}
+</head>
+<body class="page-blog">
+
+    {{TOC}}
+
+    <main class="blog-wrap">
+        <article>
+            <header class="blog-article-head">
+                <span class="blog-badge">GitHub Issue #{{NUMBER}}</span>
+                <h1 class="blog-article-title">{{TITLE}}</h1>
+                <p class="blog-article-meta">
+                    <span>{{DATE}}</span>
+                    {{UPDATED}}
+                    {{STATE}}
+                </p>
+                {{TAGS}}
+            </header>
+
+            <!-- 正文由 Markdown 在构建时渲染为 HTML -->
+            <div class="blog-article">
+{{CONTENT}}
+            </div>
+        </article>
+
+        <div class="blog-foot-actions">
+            <a class="HaloButton primary" href="./index.html">返回博客列表</a>
+            <a class="HaloButton" href="{{ISSUE_URL}}" target="_blank" rel="noopener">在 GitHub 查看原文</a>
+        </div>
+
+        {{COMMENTS}}
+    </main>
+
+    <!-- 通用导航栏（本页位于 /pages/blog/，需上跳两级） -->
+    <script src="../../assets/js/navbar.js"></script>
+{{TOC_SCRIPT}}
+</body>
+</html>

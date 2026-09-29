@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客 · 漠寒 MOHAN</title>
+    <meta name="description" content="漠寒 MOHAN 的博客，共 0 篇文章，内容来自 GitHub Issues。">
+
+    <!-- 全局样式：base（字体+令牌）→ components（通用组件）→ navbar（导航栏） -->
+    <link rel="stylesheet" href="../../assets/css/base.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/navbar.css">
+    <!-- 博客样式（列表页与文章页共用，保证博客内部观感一致） -->
+    <link rel="stylesheet" href="../../assets/css/pages/blog/blog.css">
+    <!-- 分类侧栏样式 -->
+    <link rel="stylesheet" href="../../assets/css/pages/blog/sidebar.css">
+</head>
+<body class="page-blog">
+
+    <div class="blog-home">
+                    <aside class="blog-side" data-sidebar aria-label="博客分类">
+                <p class="blog-side-title">分类</p>
+                <ul class="blog-side-list">
+                    <li class="blog-side-group"><button type="button" class="blog-side-item blog-side-item--all is-active" data-filter="" aria-pressed="true"><span class="blog-side-name">全部</span><span class="blog-side-count">0</span></button></li>
+                </ul>
+            </aside>
+
+        <main class="blog-wrap">
+            <header class="blog-head">
+                <span class="blog-badge">来自 GitHub Issues</span>
+                <h1 class="blog-title">博客</h1>
+                <p class="blog-lead">
+                    这里的内容全部来自本仓库的 GitHub Issues：给 Issue 打上 <code>blog</code> 标签，
+                    构建管线就会自动把它发布成下面的文章。
+                </p>
+            </header>
+
+            <p class="blog-filter" data-filter-status hidden></p>
+
+                    <div class="blog-empty">
+        <p class="blog-empty-title">暂无内容</p>
+        <p class="blog-empty-desc">博客文章来自本仓库的 Issue。在仓库里写一篇 Issue 并打上 <code>blog</code> 标签，构建完成后就会出现在这里。</p>
+        </div>
+
+            <div class="blog-empty blog-filter-empty" data-filter-empty hidden>
+                <p class="blog-empty-title">暂无内容</p>
+                <p class="blog-empty-desc">这个分类下还没有文章。换一个分类，或点侧栏的「全部」查看所有文章。</p>
+            </div>
+
+            <p class="blog-note">
+                共 0 篇 · 数据生成于 2026-09-29 ·
+                <a href="https://github.com/MoHanFox/MoHanFox.github.io/issues?q=label%3Ablog" target="_blank" rel="noopener">在 GitHub 上查看全部</a>
+            </p>
+        </main>
+    </div>
+
+    <!-- 通用导航栏（本页位于 /pages/blog/，需上跳两级） -->
+    <script src="../../assets/js/navbar.js"></script>
+    <!-- 分类侧栏：展开/收起 + 前端筛选（不产生额外页面） -->
+    <script src="../../assets/js/blog-sidebar.js"></script>
+</body>
+</html>

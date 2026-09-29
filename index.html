@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漠寒 MOHAN · 个人主页</title>
+    <meta name="description" content="漠寒 MOHAN 的个人主页 —— GitHub 数据与简历。">
+
+    <!-- 全局样式：base（字体+令牌）→ components（通用组件）→ navbar（导航栏） -->
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/navbar.css">
+    <!-- 首页各部分样式（每屏一个文件，便于独立维护） -->
+    <link rel="stylesheet" href="assets/css/pages/home/base.css">
+    <link rel="stylesheet" href="assets/css/pages/home/hero.css">
+    <link rel="stylesheet" href="assets/css/pages/home/stats.css">
+    <link rel="stylesheet" href="assets/css/pages/home/resume.css">
+    <link rel="stylesheet" href="assets/css/pages/home/footer.css">
+</head>
+<body class="page-home">
+
+    <!-- ============ 1. 首屏：Welcome 满屏 ============ -->
+    <section class="hero" id="top" data-animate>
+        <div class="hero-media">
+            <img class="hero-image"
+                 src="assets/img/welcome.png"
+                 alt="Welcome 背景图"
+                 fetchpriority="high"
+                 decoding="async">
+            <div class="hero-scrim" aria-hidden="true"></div>
+        </div>
+
+        <div class="hero-content">
+            <!-- 打字机：主标题 type 完，再接着 type 子标题 -->
+            <h1 class="hero-title">
+                <span data-type-text>丨漠寒MOHAN</span>
+            </h1>
+            <p class="hero-sub">
+                <span data-type-text>· Welcome To</span>
+                <span class="hero-cursor" data-type-cursor aria-hidden="true">_</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- ============ 2. GitHub 数据 ============ -->
+    <section class="stats" id="stats" data-animate>
+        <div class="section-inner">
+            <header class="section-head">
+                <p class="section-kicker">GitHub</p>
+                <h2 class="section-title">数据面板</h2>
+                <p class="section-desc">语言维度与活跃维度，数据由统计图服务实时生成。</p>
+            </header>
+
+            <!-- 3D 语言维度 -->
+            <div class="stats-block">
+                <h3 class="stats-block-title">
+                    <span class="stats-block-index">01</span>
+                    3D 语言维度
+                </h3>
+                <div class="stats-mount stats-mount--lang" data-stats="languages"></div>
+            </div>
+
+            <!-- 2D 活跃维度 -->
+            <div class="stats-block">
+                <h3 class="stats-block-title">
+                    <span class="stats-block-index">02</span>
+                    2D 活跃维度
+                </h3>
+                <div class="stats-mount stats-mount--flat" data-stats="stats"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 3. 个人简历树 ============ -->
+    <section class="resume" id="resume" data-animate>
+        <div class="section-inner">
+            <header class="section-head section-head--row">
+                <div>
+                    <p class="section-kicker">Resume</p>
+                    <h2 class="section-title">个人简历</h2>
+                </div>
+                <!-- 右上角：跳至最下 -->
+                <a class="resume-jump" href="#bottom">跳至最下</a>
+            </header>
+            <!-- 概览卡（由 assets/data/resume.json 驱动） -->
+            <div class="resume-profile" data-resume-profile></div>
+
+            <!-- 树容器（由 assets/data/resume.json 驱动） -->
+            <div class="resume-tree" data-resume-tree>
+                <p class="resume-status" data-resume-status>正在载入简历数据…</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 4. 页脚：简笔小猫 ============ -->
+    <footer class="site-foot" id="bottom" data-animate>
+        <img class="foot-cat" src="assets/img/cat.svg" alt="简笔小猫" loading="lazy" decoding="async">
+        <p class="foot-note">这是哪只小猫跑到施工的工地上了</p>
+        <a class="foot-top" href="#top">回到顶部 ↑</a>
+    </footer>
+
+    <!-- 通用导航栏（按自身 src 推导资源前缀；本页在站点根目录，不要写 ../ ） -->
+    <script src="assets/js/navbar.js"></script>
+    <!-- 统计图表（队员交付；未就绪时本页会优雅降级，不会报错） -->
+    <script src="assets/js/stats.js"></script>
+    <!-- 首屏打字机 + 滚动入场 -->
+    <script src="assets/js/hero.js"></script>
+    <!-- 简历树渲染 -->
+    <script src="assets/js/resume.js"></script>
+
+    <!-- 挂载 GitHub 统计图表（stats.js 暴露 window.HaloStats；未加载时静默跳过，不影响页面） -->
+    <script>
+        (function () {
+            'use strict';
+            var username = 'MoHanFox';
+            if (!window.HaloStats) return;
+            var langBox = document.querySelector('[data-stats="languages"]');
+            var flatBox = document.querySelector('[data-stats="stats"]');
+            if (typeof window.HaloStats.mountLanguages === 'function' && langBox) {
+                window.HaloStats.mountLanguages(langBox, username);
+            }
+            if (typeof window.HaloStats.mountStats === 'function' && flatBox) {
+                window.HaloStats.mountStats(flatBox, username);
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+/* ============================================================
+   pages/blog/blog.css — 博客（列表页 + 文章详情页）
+   两个页面共用本文件，并与主页共享 base.css 的 Halo 设计令牌，
+   以保证「博客各页之间 + 与主页」观感统一。
+   依赖：assets/css/base.css（令牌）、components.css、navbar.css
+   ============================================================ */
+
+/* ---------- 容器 ---------- */
+.blog-wrap {
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 76px 28px 96px;
+}
+
+/* ---------- 页头 ---------- */
+.blog-head {
+    margin-bottom: 44px;
+}
+
+.blog-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    font-family: var(--font-medium);
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--color-primary);
+}
+
+.blog-title {
+    margin: 18px 0 0;
+    font-family: var(--font-bold);
+    font-size: clamp(30px, 5vw, 44px);
+    letter-spacing: 3px;
+    color: var(--color-ink);
+}
+
+.blog-lead {
+    margin: 14px 0 0;
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--color-muted);
+}
+
+/* ---------- 文章列表 ---------- */
+.blog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.blog-card {
+    padding: 26px 28px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 26px rgba(26, 26, 46, 0.05);
+    transition: var(--ease-base);
+}
+
+.blog-card:hover {
+    border-color: rgba(45, 107, 239, 0.45);
+    box-shadow: 0 12px 32px rgba(45, 107, 239, 0.12);
+    transform: translateY(-2px);
+}
+
+.blog-card-title {
+    margin: 0;
+    font-family: var(--font-medium);
+    font-size: 20px;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+}
+
+.blog-card-title a {
+    color: var(--color-ink);
+    text-decoration: none;
+}
+
+.blog-card-title a:hover {
+    color: var(--color-primary);
+}
+
+.blog-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin: 10px 0 0;
+    font-family: var(--font-light);
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+.blog-card-excerpt {
+    margin: 14px 0 0;
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--color-muted);
+}
+
+/* ---------- 标签 ---------- */
+.blog-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.blog-tag {
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    font-family: var(--font-light);
+    font-size: 12px;
+    color: var(--color-primary);
+}
+
+/* 关闭状态的标记 */
+.blog-tag--closed {
+    background: var(--color-surface-alt);
+    color: var(--color-muted);
+}
+
+/* ---------- 空状态 ---------- */
+.blog-empty {
+    padding: 56px 28px;
+    text-align: center;
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.blog-empty-title {
+    margin: 0;
+    font-family: var(--font-medium);
+    font-size: 17px;
+    color: var(--color-ink);
+}
+
+.blog-empty-desc {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--color-muted);
+}
+
+.blog-empty-steps {
+    margin: 18px auto 0;
+    padding: 0;
+    max-width: 460px;
+    text-align: left;
+    font-size: 13.5px;
+    line-height: 2;
+    color: var(--color-muted);
+    list-style: none;
+}
+
+.blog-empty-steps code {
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-alt);
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    color: var(--color-ink);
+}
+
+/* ---------- 文章详情页 ---------- */
+.blog-article-head {
+    margin-bottom: 36px;
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.blog-article-title {
+    margin: 16px 0 0;
+    font-family: var(--font-bold);
+    font-size: clamp(26px, 4.2vw, 36px);
+    line-height: 1.45;
+    letter-spacing: 2px;
+    color: var(--color-ink);
+}
+
+.blog-article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin: 14px 0 0;
+    font-family: var(--font-light);
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+/* md 渲染出的正文：按标签选择器统一样式，保证与站点令牌一致 */
+.blog-article {
+    font-size: 15.5px;
+    line-height: 1.95;
+    color: #2c3444;
+    word-wrap: break-word;
+}
+
+.blog-article > *:first-child {
+    margin-top: 0;
+}
+
+.blog-article h1,
+.blog-article h2,
+.blog-article h3,
+.blog-article h4 {
+    margin: 2em 0 0.7em;
+    font-family: var(--font-bold);
+    line-height: 1.5;
+    letter-spacing: 1px;
+    color: var(--color-ink);
+}
+
+.blog-article h1 {
+    font-size: 26px;
+}
+
+.blog-article h2 {
+    font-size: 22px;
+    padding-bottom: 0.35em;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.blog-article h3 {
+    font-size: 18px;
+}
+
+.blog-article h4 {
+    font-size: 16px;
+}
+
+.blog-article p {
+    margin: 0 0 1.2em;
+}
+
+.blog-article a {
+    color: var(--color-primary);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(45, 107, 239, 0.35);
+}
+
+.blog-article a:hover {
+    border-bottom-color: var(--color-primary);
+}
+
+.blog-article strong {
+    font-family: var(--font-medium);
+    color: var(--color-ink);
+}
+
+.blog-article ul,
+.blog-article ol {
+    margin: 0 0 1.2em;
+    padding-left: 1.5em;
+}
+
+.blog-article li {
+    margin: 0.35em 0;
+}
+
+.blog-article li > ul,
+.blog-article li > ol {
+    margin: 0.35em 0 0.35em;
+}
+
+/* 任务列表 */
+.blog-article li.task-list-item,
+.blog-article li:has(> input[type="checkbox"]) {
+    list-style: none;
+    margin-left: -1.25em;
+}
+
+.blog-article input[type="checkbox"] {
+    margin-right: 0.55em;
+}
+
+/* 引用块 */
+.blog-article blockquote {
+    margin: 0 0 1.2em;
+    padding: 4px 20px;
+    border-left: 3px solid rgba(45, 107, 239, 0.32);
+    background: rgba(45, 107, 239, 0.04);
+    color: var(--color-muted);
+}
+
+.blog-article blockquote > *:last-child {
+    margin-bottom: 0;
+}
+
+/* 行内代码 */
+.blog-article code {
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-alt);
+    font-family: Consolas, Monaco, "Courier New", monospace;
+    font-size: 0.88em;
+    color: #b4326b;
+}
+
+/* 代码块 */
+.blog-article pre {
+    margin: 0 0 1.4em;
+    padding: 18px 20px;
+    overflow-x: auto;
+    background: #1a1a2e;
+    border-radius: var(--radius-md);
+    line-height: 1.7;
+}
+
+.blog-article pre code {
+    padding: 0;
+    background: none;
+    color: #e6e9f2;
+    font-size: 13px;
+}
+
+/* 表格 */
+.blog-article table {
+    width: 100%;
+    margin: 0 0 1.4em;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.blog-article th,
+.blog-article td {
+    padding: 9px 12px;
+    border: 1px solid var(--color-border);
+    text-align: left;
+}
+
+.blog-article th {
+    background: var(--color-surface-alt);
+    font-family: var(--font-medium);
+    color: var(--color-ink);
+}
+
+/* 图片 */
+.blog-article img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+}
+
+/* 分隔线 */
+.blog-article hr {
+    margin: 2em 0;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+}
+
+/* ---------- 文章页脚动作 ---------- */
+.blog-foot-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 46px;
+    padding-top: 26px;
+    border-top: 1px solid var(--color-border);
+}
+
+.blog-foot-actions .HaloButton {
+    width: auto;
+    min-width: 132px;
+    padding: 0 20px;
+    text-decoration: none;
+}
+
+/* ---------- 列表页脚 ---------- */
+.blog-note {
+    margin: 30px 0 0;
+    font-family: var(--font-light);
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--color-muted);
+}
+
+.blog-note a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.blog-note a:hover {
+    text-decoration: underline;
+}
+
+/* ---------- 小屏 ---------- */
+@media (max-width: 768px) {
+    .blog-wrap {
+        padding: 56px 20px 76px;
+    }
+
+    .blog-card {
+        padding: 20px 18px;
+    }
+
+    .blog-card-title {
+        font-size: 18px;
+    }
+
+    .blog-article {
+        font-size: 15px;
+    }
+
+    .blog-article h2 {
+        font-size: 20px;
+    }
+
+    .blog-article pre {
+        padding: 14px 16px;
+    }
+}

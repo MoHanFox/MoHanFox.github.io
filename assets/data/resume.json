@@ -1,0 +1,85 @@
+{
+  "_readme": "简历数据源。改这个文件即可更新主页第 3 屏的简历树，无需动 HTML/CSS。字段说明见仓库 README 的「简历树定制」一节。children 支持任意层级嵌套。",
+  "profile": {
+    "name": "漠寒 MOHAN",
+    "title": "示例标题 · 请替换为你的一句话自我介绍",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/MoHanFox" },
+      { "label": "邮箱", "url": "mailto:your-mail@example.com" }
+    ]
+  },
+  "timeline": [
+    {
+      "title": "教育经历（示例，请替换）",
+      "time": "2022 — 2026",
+      "desc": "这里写学校、专业与主要课程方向。删除本段不影响结构，整棵树由下面的 JSON 递归渲染。",
+      "tags": ["示例标签", "可删除"],
+      "children": [
+        {
+          "title": "主修方向 / 学位",
+          "time": "2022 — 2026",
+          "tags": ["计算机相关"]
+        },
+        {
+          "title": "在校项目或竞赛",
+          "time": "2023 — 2025",
+          "desc": "支持子级继续嵌套，再往下还可以有孙级节点。",
+          "children": [
+            {
+              "title": "校级项目（第三层示例）",
+              "time": "2024",
+              "tags": ["示例"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "工作 / 实习经历（示例，请替换）",
+      "time": "2024 — 至今",
+      "desc": "写清岗位、职责与产出。desc 里可以用 \\n 换行。",
+      "tags": ["示例标签"],
+      "children": [
+        {
+          "title": "负责的第一件主要事情",
+          "time": "2024 — 2025",
+          "desc": "补充背景、你做了什么、带来了什么结果。"
+        },
+        {
+          "title": "负责的第二件主要事情",
+          "time": "2025 — 至今"
+        }
+      ]
+    },
+    {
+      "title": "项目经历（示例，请替换）",
+      "time": "持续更新",
+      "children": [
+        {
+          "title": "个人站点 MoHanFox.github.io",
+          "time": "2026",
+          "desc": "纯静态、无构建步骤的个人主页：首屏打字机、GitHub 数据面板、JSON 驱动的简历树。",
+          "tags": ["HTML", "CSS", "原生 JS", "GitHub Actions"]
+        },
+        {
+          "title": "下一个项目",
+          "time": "待补充"
+        }
+      ]
+    },
+    {
+      "title": "技能（示例，请替换）",
+      "desc": "按熟悉程度分组，或直接平铺列出。",
+      "children": [
+        {
+          "title": "语言",
+          "tags": ["C#", "JavaScript", "Python", "C++"]
+        },
+        {
+          "title": "工具与平台",
+          "tags": ["Unity", "Git", "GitHub Actions", "Linux"]
+        }
+      ]
+    }
+  ]
+}
