@@ -1,8 +1,26 @@
 {
-  "generatedAt": "2026-09-29T14:29:40.812Z",
+  "generatedAt": "2026-09-29T15:10:07.203Z",
   "repo": "MoHanFox/MoHanFox.github.io",
-  "count": 1,
+  "count": 2,
   "issues": [
+    {
+      "number": 8,
+      "title": "使用Go快速搭建简易后端",
+      "author": "MoHanFox",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/8",
+      "state": "open",
+      "createdAt": "2026-09-29T15:09:50Z",
+      "updatedAt": "2026-09-29T15:09:50Z",
+      "labels": [
+        "blog",
+        "Go/精选"
+      ],
+      "tags": [
+        "Go/精选"
+      ],
+      "body": "使用的Go模块: \n- Gin:  Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。\n- Gorm:  GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。\n    > 本章节使用 MySQL 数据库作演示\n- Viper:  Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，包括JSON、TOML、YAML、HCL、envfile和Java属性文件。\n- Go: [Go](https://go.dev/) [1.25](https://go.dev/doc/devel/release#go1.25) 或更高版本\n\n# 项目准备\n1. 创造你的Go目录\n2. 为你的项目装载以上模块\n\n```go.mod\nrequire (\n\tgithub.com/gin-contrib/cors v1.7.9          //官方的Cors，本章节也会提供定制Cors\n\tgithub.com/gin-gonic/gin v1.12.0\n\tgithub.com/spf13/viper v1.21.0\n\tgorm.io/driver/mysql v1.6.0\n\tgorm.io/gorm v1.31.2\n)\n```\n3. 开始\nDrift，待更新",
+      "excerpt": "使用的Go模块: - Gin: Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。 - Gorm: GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。 > 本章节使用 MySQL 数据库作演示 - Viper: Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，"
+    },
     {
       "number": 5,
       "title": "欢迎!!",

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用Go快速搭建简易后端 · 漠寒 MOHAN</title>
+    <meta name="description" content="使用的Go模块: Gin: Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。 Gorm: GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。 &gt; 本章节使用 MySQL 数据库作演示 Viper: Viper是一个流行的Go库，…">
+
+    <!-- 全局样式：base（字体+令牌）→ components（通用组件）→ navbar（导航栏） -->
+    <link rel="stylesheet" href="../../assets/css/base.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/navbar.css">
+    <!-- 与列表页共用同一份博客样式 -->
+    <link rel="stylesheet" href="../../assets/css/pages/blog/blog.css">
+
+    <!-- 评论区样式（与博客样式分开，未启用评论时不加载） -->
+    <link rel="stylesheet" href="../../assets/css/pages/blog/giscus.css">
+</head>
+<body class="page-blog">
+
+    
+
+    <main class="blog-wrap">
+        <article>
+            <header class="blog-article-head">
+                <span class="blog-badge">GitHub Issue #8</span>
+                <h1 class="blog-article-title">使用Go快速搭建简易后端</h1>
+                <p class="blog-article-meta">
+                    <a class="blog-byline-author" href="https://github.com/MoHanFox" target="_blank" rel="noopener noreferrer">MoHanFox</a><span class="blog-byline-sep" aria-hidden="true">-</span><time class="blog-byline-date" datetime="2026-09-29">2026-09-29</time>
+                    
+                    
+                </p>
+                                <div class="blog-tags"><span class="blog-tag">Go/精选</span></div>
+            </header>
+
+            <!-- 正文由 Markdown 在构建时渲染为 HTML -->
+            <div class="blog-article">
+<p>使用的Go模块: </p>
+<ul>
+<li>Gin:  Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。</li>
+<li>Gorm:  GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。<blockquote>
+<p>本章节使用 MySQL 数据库作演示</p>
+</blockquote>
+</li>
+<li>Viper:  Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，包括JSON、TOML、YAML、HCL、envfile和Java属性文件。</li>
+<li>Go: <a href="https://go.dev/" target="_blank" rel="noopener noreferrer">Go</a> <a href="https://go.dev/doc/devel/release#go1.25" target="_blank" rel="noopener noreferrer">1.25</a> 或更高版本</li>
+</ul>
+<h1 id="项目准备">项目准备
+</h1>
+<ol>
+<li>创造你的Go目录</li>
+<li>为你的项目装载以上模块</li>
+</ol>
+<pre><code class="language-go.mod">require (
+	github.com/gin-contrib/cors v1.7.9          //官方的Cors，本章节也会提供定制Cors
+	github.com/gin-gonic/gin v1.12.0
+	github.com/spf13/viper v1.21.0
+	gorm.io/driver/mysql v1.6.0
+	gorm.io/gorm v1.31.2
+)
+</code></pre>
+<ol start="3">
+<li>开始
+Drift，待更新</li>
+</ol>
+
+            </div>
+        </article>
+
+        <div class="blog-foot-actions">
+            <a class="HaloButton primary" href="./index.html">返回博客列表</a>
+            <a class="HaloButton" href="https://github.com/MoHanFox/MoHanFox.github.io/issues/8" target="_blank" rel="noopener">在 GitHub 查看原文</a>
+        </div>
+
+                <section class="blog-comments">
+            <h2 class="blog-comments-title">评论</h2>
+            <!-- giscus 会把评论 iframe 放进这个容器 -->
+            <div class="giscus"></div>
+        <script src="https://giscus.app/client.js"
+        data-repo="MoHanFox/MoHanFox.github.io"
+        data-repo-id="R_kgDOUaoChQ"
+        data-category="Blog Chat"
+        data-category-id="DIC_kwDOUaoChc4DGpxu"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        loading="lazy"
+        crossorigin="anonymous"
+        async>
+        </script>
+        </section>
+    </main>
+
+    <!-- 通用导航栏（本页位于 /pages/blog/，需上跳两级） -->
+    <script src="../../assets/js/navbar.js"></script>
+
+</body>
+</html>
