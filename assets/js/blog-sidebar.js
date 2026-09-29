@@ -107,7 +107,7 @@
                 if (!parentList || !parentList.hasAttribute('data-subs')) break;
                 parentList.removeAttribute('hidden');
                 var parentGroup = parentList.closest('.blog-side-group');
-                var parentToggle = parentGroup ? parentGroup.querySelector(':scope > .blog-side-row > [data-toggle]') : null;
+                var parentToggle = parentGroup ? parentGroup.querySelector('.blog-side-row [data-toggle]') : null;
                 if (parentToggle) parentToggle.setAttribute('aria-expanded', 'true');
                 node = parentGroup;
             }
@@ -206,6 +206,8 @@
                 toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
                 if (expanded) subs.setAttribute('hidden', '');
                 else subs.removeAttribute('hidden');
+                // 记住展开状态，返回/刷新后仍保持
+                saveExpanded();
                 return;
             }
 
@@ -215,6 +217,8 @@
             state.cat = button.getAttribute('data-filter') || '';
             // 选中深层分类时把祖先展开，否则看不到自己选中的是哪一项
             revealAncestors(state.cat);
+            // 这次展开也要记住：否则返回后祖先收回去，选中的子项又藏起来了
+            saveExpanded();
             apply(true);
         });
     }
@@ -274,13 +278,15 @@
         });
     }
 
-    // 浏览器前进 / 后退
+    // 浏览器前进 / 后退（同页内的筛选历史）
     window.addEventListener('popstate', function () {
         readUrl();
         if (input) input.value = state.query;
         if (scopeSelect) scopeSelect.value = state.scope;
         syncPlaceholder();
         apply(false);
+        // 同页返回也算「返回」：同样恢复到原来的位置
+        restorePageScroll();
     });
 
     function readUrl() {
@@ -296,12 +302,173 @@
         }
     }
 
+    /* ---------------- 状态记忆（展开项 + 滚动位置） ----------------
+       分类本身已经写在 URL（?cat=…）里，所以「返回时记住分类」天然成立；
+       这里补上两件不带 URL 的状态：展开的分组、滚动位置。
+       用 sessionStorage：刷新与返回/前进都保留，关掉标签页即清空
+       （比 localStorage 更符合「这次浏览的上下文」语义）。 */
+
+    var EXPANDED_KEY = 'halo:blog:expanded';
+    var SCROLL_KEY = 'halo:blog:scroll';
+
+    function groupKey(group) {
+        if (!group) return '';
+        // 注意用后代选择器：data-filter 与 data-toggle 都嵌在同一个 <button> 内部，
+        // 箭头是 button 的子元素而不是 .blog-side-row 的直接子元素（这里踩过坑）
+        var button = group.querySelector('.blog-side-row [data-filter]');
+        return button ? button.getAttribute('data-filter') || '' : '';
+    }
+
+    /** 记录当前已展开的分组（用分类路径作 key，刷新后仍能对上） */
+    function saveExpanded() {
+        if (!sidebar) return;
+        try {
+            var list = [];
+            sidebar.querySelectorAll('.blog-side-group [data-toggle][aria-expanded="true"]')
+                .forEach(function (toggle) {
+                    var key = groupKey(toggle.closest('.blog-side-group'));
+                    if (key) list.push(key);
+                });
+            window.sessionStorage.setItem(EXPANDED_KEY, JSON.stringify(list));
+        } catch (error) {
+            // 隐私模式 / 存储被禁用：记不住不影响使用
+        }
+    }
+
+    function restoreExpanded() {
+        if (!sidebar) return;
+        var list;
+        try {
+            list = JSON.parse(window.sessionStorage.getItem(EXPANDED_KEY) || '[]');
+        } catch (error) {
+            list = [];
+        }
+        if (!Array.isArray(list) || !list.length) return;
+
+        list.forEach(function (key) {
+            sidebar.querySelectorAll('.blog-side-group').forEach(function (group) {
+                if (groupKey(group) !== key) return;
+                var subs = group.querySelector(':scope > [data-subs]');
+                var toggle = group.querySelector('.blog-side-row [data-toggle]');
+                if (subs) subs.removeAttribute('hidden');
+                if (toggle) toggle.setAttribute('aria-expanded', 'true');
+            });
+        });
+    }
+
+    /**
+     * 修复品读位置：读者读完列表最下面那篇，返回列表页时不该再从头翻。
+     *
+     * 靠浏览器自己的滚动恢复不可靠 —— 本站的列表是「构建时全渲染 + JS 筛选」，
+     * 页面加载早期卡片可能还是隐藏的、文档高度不足，浏览器的自动恢复会落空。
+     * 所以这里改成显式控制：
+     *   · history.scrollRestoration = 'manual'，不让浏览器和我们抢；
+     *   · 只有「返回/前进历史」或「刷新」才恢复；
+     *     从导航栏重新点进博客（type=reload 之外的新导航）则从顶部开始，
+     *     符合「我主动进列表页，想从头看」的预期。
+     */
+    var navType = (function () {
+        try {
+            return (window.performance && performance.getEntriesByType
+                ? (performance.getEntriesByType('navigation')[0] || {}).type
+                : '') || '';
+        } catch (error) {
+            return '';
+        }
+    })();
+    var SHOULD_RESTORE = navType === 'back_forward' || navType === 'reload' || navType === 'prerender';
+
+    if ('scrollRestoration' in window.history) {
+        try {
+            window.history.scrollRestoration = 'manual';
+        } catch (error) {
+            // 个别浏览器只读：不影响，下面的显式恢复仍然生效
+        }
+    }
+
+    function saveScroll() {
+        try {
+            window.sessionStorage.setItem(SCROLL_KEY, JSON.stringify({
+                page: window.scrollY || window.pageYOffset || 0,
+                side: sidebar ? sidebar.scrollTop || 0 : 0
+            }));
+        } catch (error) {
+            // 隐私模式 / 存储被禁用：记不住不影响浏览
+        }
+    }
+
+    function restorePageScroll() {
+        var saved;
+        try {
+            saved = JSON.parse(window.sessionStorage.getItem(SCROLL_KEY) || 'null');
+        } catch (error) {
+            saved = null;
+        }
+        if (!saved || typeof saved.page !== 'number') return;
+
+        var target = saved.page;
+        // 参考当前高度先给哨兵，便于自动化测试确认「恢复逻辑确实执行过」
+        document.documentElement.setAttribute('data-scroll-target', String(target));
+        // 文档高度在筛选/字体加载后才会稳定，所以带几次重试；
+        // 这是「返回后停在原位」可靠性的关键，不能只设一次。
+        var tries = 0;
+        var apply = function () {
+            tries += 1;
+            window.scrollTo(0, target);
+            var doc = document.documentElement;
+            var reached = Math.abs((window.scrollY || 0) - target) < 2;
+            // 还没滚到目标（文档高度不够）就再试几次；已经到底则不必空转
+            if (!reached && tries < 6 && doc.scrollHeight > doc.clientHeight) {
+                window.setTimeout(apply, 60);
+            }
+        };
+        window.requestAnimationFrame(apply);
+
+        if (sidebar && typeof saved.side === 'number' && saved.side > 0) {
+            window.setTimeout(function () {
+                sidebar.scrollTop = saved.side;
+            }, 0);
+        }
+    }
+
+    /**
+     * 首次加载时是否该恢复位置。
+     * 只有「返回/前进历史」或「刷新」才恢复；从导航栏主动点进博客则从顶部开始。
+     * 注意：同页 popstate 的导航类型仍是 'navigate'，所以那条路径不走这个判断，
+     * 由 popstate 处理器直接调用 restorePageScroll()。
+     */
+    function restoreOnFirstLoad() {
+        if (SHOULD_RESTORE) restorePageScroll();
+    }
+
+    // 节流保存滚动位置：scroll 事件很密集，没必要每次都写 sessionStorage
+    var scrollTimer = null;
+    function onScroll() {
+        if (scrollTimer) return;
+        scrollTimer = window.setTimeout(function () {
+            scrollTimer = null;
+            saveScroll();
+        }, 150);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    if (sidebar) sidebar.addEventListener('scroll', onScroll, { passive: true });
+    // pagehide 比 beforeunload 更可靠（移动端 Safari 常常不触发 beforeunload）
+    window.addEventListener('pagehide', saveScroll);
+    // 标签页/窗口切到后台也存一次：读者很可能是直接切走再回来
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') saveScroll();
+    });
+
     /* ---------------- 初始化 ---------------- */
 
     readUrl();
     if (input) input.value = state.query;
     if (scopeSelect) scopeSelect.value = state.scope;
     syncPlaceholder();
+    restoreExpanded();
     if (state.cat) revealAncestors(state.cat);
     apply(false);
+    // 恢复品读位置：放在 apply 之后，此时筛选已应用、列表高度基本确定
+    restoreOnFirstLoad();
 })();
