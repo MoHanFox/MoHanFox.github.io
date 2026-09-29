@@ -28,7 +28,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
-import { renderMarkdown, escapeHtml, markedVersion } from './markdown.mjs';
+import { renderMarkdown, escapeHtml, toPlainText, markedVersion } from './markdown.mjs';
 
 const DEFAULT_DATA = 'pages/blog/data/issues.json';
 const DEFAULT_OUT_DIR = 'pages/blog';
@@ -192,7 +192,7 @@ export function renderToc(headings) {
 }
 
 export function parseArgs(argv) {
-  const opts = { data: DEFAULT_DATA, outDir: DEFAULT_OUT_DIR, check: false, help: false };
+  const opts = { data: DEFAULT_DATA, outDir: DEFAULT_OUT_DIR, check: false, allowMissingData: false, help: false };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     const next = () => {
@@ -208,6 +208,7 @@ export function parseArgs(argv) {
     else if (arg === '--out-dir') opts.outDir = next();
     else if (arg.startsWith('--out-dir=')) opts.outDir = arg.slice('--out-dir='.length);
     else if (arg === '--check') opts.check = true;
+    else if (arg === '--allow-missing-data') opts.allowMissingData = true;
     else if (arg === '--help' || arg === '-h') opts.help = true;
     else throw new Error(`unknown argument: ${arg}`);
   }
@@ -281,20 +282,27 @@ function renderTags(tags) {
 
 /**
  * 列表页的一张文章卡。
- * data-cats 存该文章的分类路径（空格分隔），前端侧栏据此做筛选，
- * 因此筛选不需要额外页面，也不会产生新的构建产物。
+ * data-cats 存该文章的分类路径（空格分隔），前端侧栏据此做筛选；
+ * data-text 存标题+摘要+标签的小写拼接，供前端搜索直接做子串匹配。
+ * 两者都在构建时算好，前端不需要额外请求，也不会产生新的构建产物。
  */
 function renderCard(issue, categories) {
   const number = Number(issue.number) || 0;
-  const title = escapeHtml(String(issue.title || `（无标题 issue #${number}）`));
-  const excerpt = escapeHtml(String(issue.excerpt || ''));
+  const title = String(issue.title || `（无标题 issue #${number}）`);
+  // 摘要可能来自 build-issues（已清理），也可能是手写/旧数据里的原始 Markdown，统一去标记
+  const excerpt = toPlainText(issue.excerpt);
   const date = formatDate(issue.createdAt || issue.updatedAt);
   const closed = String(issue.state).toLowerCase() === 'closed';
   const cats = Array.isArray(categories) ? categories : [];
+  const searchText = [title, excerpt].concat(Array.isArray(issue.tags) ? issue.tags : [])
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
 
   const lines = [
-    `<li class="blog-card" data-cats="${escapeHtml(cats.join(' '))}" data-number="${number}">`,
-    `<h2 class="blog-card-title"><a href="./${POST_FILE_PREFIX}${number}.html">${title}</a></h2>`,
+    `<li class="blog-card" data-cats="${escapeHtml(cats.join(' '))}" data-text="${escapeHtml(searchText)}" data-number="${number}">`,
+    `<h2 class="blog-card-title"><a href="./${POST_FILE_PREFIX}${number}.html">${escapeHtml(title)}</a></h2>`,
     '<p class="blog-card-meta">',
     date ? `<span>${date}</span>` : '',
     `<span>#${number}</span>`,
@@ -302,7 +310,7 @@ function renderCard(issue, categories) {
     '</p>'
   ];
 
-  if (excerpt) lines.push(`<p class="blog-card-excerpt">${excerpt}</p>`);
+  if (excerpt) lines.push(`<p class="blog-card-excerpt">${escapeHtml(excerpt)}</p>`);
 
   const tags = renderTags(issue.tags);
   if (tags) lines.push(tags);
@@ -502,7 +510,7 @@ export async function buildPages(payload, repo, giscusConfig = null) {
     // 传入数组即开启标题收集；渲染结束时 marked 会把它填满
     const headingIds = [];
     const content = renderMarkdown(body, { headingIds });
-    const excerpt = issue.excerpt || toMetaText(body);
+    const excerpt = toPlainText(issue.excerpt) || toMetaText(toPlainText(body));
     const toc = renderToc(headingIds);
 
     const postTokens = {
@@ -539,10 +547,11 @@ export async function main(argv = process.argv.slice(2)) {
     console.log(`Usage: node scripts/build-blog.mjs [options]
 
 Options:
-  --data <path>      issues.json 路径（默认 ${DEFAULT_DATA}）
-  --out-dir <dir>    输出目录（默认 ${DEFAULT_OUT_DIR}）
-  --check            只校验，不写盘；若存在过期文章页则以非零退出
-  -h, --help         显示帮助`);
+  --data <path>           issues.json 路径（默认 ${DEFAULT_DATA}）
+  --out-dir <dir>         输出目录（默认 ${DEFAULT_OUT_DIR}）
+  --check                 只校验，不写盘；若存在过期文章页则以非零退出
+  --allow-missing-data    没有 issues.json 时按「暂无文章」生成（本地预览用）
+  -h, --help              显示帮助`);
     return 0;
   }
 
@@ -553,7 +562,14 @@ Options:
   try {
     payload = JSON.parse(await readFile(dataPath, 'utf8'));
   } catch (error) {
-    throw new Error(`读取 ${dataPath} 失败：${error?.message ?? error}（请先运行 scripts/build-issues.mjs）`);
+    // --allow-missing-data 是给本地预览用的：没有 issues.json 时按「暂无文章」生成，
+    // 这样在编辑器里直接打开博客页也能看到样式，而不是 404。
+    if (opts.allowMissingData && error && error.code === 'ENOENT') {
+      console.log(`[build-blog] 未找到 ${dataPath}，按「暂无文章」生成（--allow-missing-data）`);
+      payload = { generatedAt: new Date().toISOString(), repo: null, count: 0, issues: [] };
+    } else {
+      throw new Error(`读取 ${dataPath} 失败：${error?.message ?? error}（请先运行 scripts/build-issues.mjs，或加 --allow-missing-data 本地预览）`);
+    }
   }
 
   const giscusConfig = await readGiscusConfig();

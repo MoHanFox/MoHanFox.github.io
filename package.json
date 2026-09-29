@@ -7,7 +7,11 @@
   "scripts": {
     "build:issues": "node scripts/build-issues.mjs",
     "build:blog": "node scripts/build-blog.mjs",
-    "build": "node scripts/build-issues.mjs && node scripts/build-blog.mjs"
+    "build": "node scripts/build-issues.mjs && node scripts/build-blog.mjs",
+    "preview:blog": "node scripts/build-blog.mjs --allow-missing-data",
+    "preview:demo": "node scripts/build-blog.mjs --data assets/data/demo-issues.json",
+    "preview": "npm run preview:blog && python -m http.server 8000",
+    "preview:demo:serve": "npm run preview:demo && python -m http.server 8000"
   },
   "dependencies": {
     "marked": "^18.0.14"

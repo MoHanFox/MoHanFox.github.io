@@ -329,6 +329,38 @@ function stripTags(html) {
 }
 
 /**
+ * 把一段 Markdown 的标记去掉，得到适合做摘要/搜索匹配的纯文本。
+ * 摘要来源可能是 build-issues 生成好的（已清理），也可能是手写或旧数据里的原始
+ * Markdown —— 后者若直接显示，卡片上会出现 `##`、`**` 之类的标记，所以统一过一遍。
+ */
+export function toPlainText(md) {
+  const raw = String(md === null || md === undefined ? '' : md);
+  if (!raw.trim()) return '';
+
+  return raw
+    // 代码围栏整段去掉（含内容），摘要里出现代码没有意义
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/~~~[\s\S]*?~~~/g, ' ')
+    // 图片留 alt，链接留文字
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    // 标题、引用、列表符号（按行首处理）
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replace(/^\s{0,3}>\s?/gm, '')
+    .replace(/^\s{0,3}(?:[-*+]|\d+\.)\s+/gm, '')
+    // 兜底：摘要可能是一整行（标题不在行首），此时把残留的 `## ` / `- ` 也去掉
+    .replace(/#{1,6}\s+/g, ' ')
+    .replace(/(?:^|\s)(?:[-*+]|\d+\.)\s+/g, ' ')
+    // 分隔线与行内标记
+    .replace(/^\s{0,3}(?:[-*_]\s*){3,}$/gm, ' ')
+    .replace(/[*_~`]/g, '')
+    // 行内 HTML 标签
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Markdown -> HTML。
  *
  * @param {unknown} md 原始 Markdown。undefined / null / 非字符串 / 空串都合法。

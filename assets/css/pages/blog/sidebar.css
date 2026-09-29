@@ -139,6 +139,90 @@
     border-left-color: var(--color-primary);
 }
 
+/* ---------- 搜索（位于第一篇文章上方） ---------- */
+.blog-search {
+    margin-bottom: 22px;
+}
+
+.blog-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    height: 42px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blog-search-box:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(45, 107, 239, 0.12);
+}
+
+/* 放大镜用纯 CSS 画，省一个图标请求 */
+.blog-search-icon {
+    flex: 0 0 auto;
+    position: relative;
+    width: 13px;
+    height: 13px;
+    border: 1.6px solid var(--color-placeholder);
+    border-radius: 50%;
+}
+
+.blog-search-icon::after {
+    content: "";
+    position: absolute;
+    right: -4px;
+    bottom: -3px;
+    width: 6px;
+    height: 1.6px;
+    background: var(--color-placeholder);
+    transform: rotate(45deg);
+}
+
+.blog-search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-light);
+    font-size: 14px;
+    color: var(--color-ink);
+}
+
+.blog-search-input::placeholder {
+    color: var(--color-placeholder);
+}
+
+/* 去掉 Chrome/Safari 自带的搜索清除按钮，避免和我们自己的「清空」重复 */
+.blog-search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.blog-search-clear {
+    flex: 0 0 auto;
+    padding: 3px 9px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-alt);
+    font-family: var(--font-light);
+    font-size: 12px;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: var(--ease-base);
+}
+
+.blog-search-clear:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
 /* ---------- 当前筛选提示 ---------- */
 .blog-filter {
     margin: 0 0 18px;

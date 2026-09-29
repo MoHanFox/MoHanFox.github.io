@@ -36,7 +36,8 @@ MoHanFox.github.io/
 │   │           ├── toc.css             文章页右侧章节导航样式
 │   │           └── giscus.css          评论区样式（未启用评论时不加载）
 │   ├── data/
-│   │   └── resume.json                 ★ 简历树数据源，改这个文件即可更新简历
+│   │   ├── resume.json                 ★ 简历树数据源，改这个文件即可更新简历
+│   │   └── demo-issues.json            ★ 本地 UI 检验用的演示数据（假文章，见第五节）
 │   ├── js/
 │   │   ├── navbar.js                   通用导航栏（自动推导资源前缀 + 当前页高亮）
 │   │   ├── hero.js                     首屏打字机 + 滚动入场
@@ -218,6 +219,17 @@ issues.json ──> scripts/build-blog.mjs ──> pages/blog/index.html        
   —— 因为文章来自 Issue，Issue 被取消 `blog` 标签或删除后，对应文章页会一并下线；
 - 工作流的 `_site` 组装与健全性检查都已包含 `404.html`，漏了会导致线上退回 GitHub 默认 404。
 
+### 首页搜索
+
+搜索框在**第一篇文章上方**。
+
+- 检索范围：**标题 + 摘要 + 标签**（构建时算好写进卡片的 `data-text`，前端只做子串匹配，不发请求）；
+- 大小写不敏感；输入多个关键字按「**都要命中**」处理（`go 并发` 只留同时含两者的文章）；
+- 输入有 120ms 防抖，回车立即生效；
+- 与分类筛选是**与**关系：先按分类缩小，再在结果里搜关键字；清掉关键字就回到该分类的全部；
+- 状态写进 URL 的 `?q=`（和分类的 `?cat=` 并存），刷新、分享链接、前进后退都能还原；
+- 无结果时列表位置显示「未找到相关文章」，并提供「清空」按钮。
+
 ### 首页分类侧栏
 
 博客首页左侧有分类侧栏：**「全部」+ 可展开的分类树**。
@@ -243,18 +255,22 @@ issues.json ──> scripts/build-blog.mjs ──> pages/blog/index.html        
 
 ### 文章页右侧章节导航
 
-文章页会根据正文里的标题自动生成一栏竖向目录（`-` 刻度 + 标题），**点击定位、滚动高亮当前章节**，
+文章页会根据正文里的标题自动生成一栏目录（`-` 刻度 + 标题），**点击定位、滚动高亮当前章节**，
 交互参考 DeepSeek 对话界面右侧的对话导航。
 
+- **永远固定在屏幕右中**（`position: fixed` + `top: 50%`），滚动时位置不变，实测滚动 400/900/1388px 三个位置坐标完全一致、与视口中心偏差 0px；
+- 固定在右侧时会**给正文让出 240px**（`padding-right`），因此正文仍在剩余空间里水平居中、不会被压住；
+- 目录比视口高时**自身滚动**（`max-height: 68vh`），不会溢出被裁掉；
+- 断点 **1220px**：低于这个宽度放不下固定栏，改为贴在正文上方（随页面滚动，带竖线）；
 - 标题锚点与目录 id **同源**（都由 `renderMarkdown` 的 `headingIds` 产生），不会出现跳转错位；
 - 重名标题自动加后缀去重（`## 小结` 出现两次 → `小结` / `小结-1`）；
 - 中英文标题都保留原文作锚点（`丨漠寒MOHAN` 不会被折成小写或丢失）；
-- 响应式：宽屏（≥1500px）固定在正文右侧并垂直居中；中等宽度贴在正文上方；手机端不显示；
-- **标题少于 2 个时整栏不渲染**，也不加载对应的 CSS/JS。
+- **标题少于 2 个时整栏不渲染**，也不加载对应的 CSS/JS；手机端同样不显示。
 
 维护提示：`assets/js/toc.js` 里的滚动更新**不用 `requestAnimationFrame` 节流**，
 因为 rAF 一旦不回调（标签页隐藏等），「已排队」标志会永久卡住、高亮从此失效；
 同时也**不只依赖 scroll 事件**（无头浏览器实测该事件可能完全不触发），而是事件 + 250ms 低频轮询兜底。
+高亮项在目录面板内滚动用的是手动 `scrollTop`，**不能用 `scrollIntoView`** —— 那会连 window 一起滚，导致页面被目录拽回去。
 
 ### 评论功能（giscus）
 
@@ -293,15 +309,51 @@ python -m http.server 8000
 # 浏览器访问 http://localhost:8000/
 ```
 
-> 博客的 `pages/blog/index.html` 与 `post-*.html` 是**构建产物、不入库**，所以本地想预览博客要先构建：
->
-> ```powershell
-> npm install
-> node scripts/build-issues.mjs --from-file .\fixture.json --repo MoHanFox/MoHanFox.github.io
-> node scripts/build-blog.mjs
-> ```
->
-> 主页（`index.html`）与简历树不需要构建，直接起服务即可。新克隆仓库后 `pages/blog/` 是空的，这是正常的。
+> 博客的 `pages/blog/index.html` 与 `post-*.html` 是**构建产物、不入库**（见 `.gitignore`），
+> 所以新克隆仓库后 `pages/blog/` 是空的 —— **在 IDE 里直接打开博客页会 404，这是正常的**，不是坏了。
+> 主页（`index.html`）与简历树不需要构建，直接起服务即可。
+
+### 本地跑起博客（四种方式）
+
+```powershell
+npm install          # 只为 marked
+
+# 1) 只想看空状态：不需要任何数据
+npm run preview:blog
+
+# 2) 检验 UI（推荐）：用内置演示数据，覆盖各种边界
+npm run preview:demo
+
+# 3) 用真实数据：自己准备一份 issue 夹具（数组，或 { "issues": [...] }）
+node scripts/build-issues.mjs --from-file .\fixture.json --repo MoHanFox/MoHanFox.github.io
+node scripts/build-blog.mjs
+
+# 4) 起服务后访问
+python -m http.server 8000
+# 首页 http://localhost:8000/ ，博客 http://localhost:8000/pages/blog/
+```
+
+也可以 `npm run preview:demo:serve`（生成演示站点并直接起 8000 端口）。
+
+**演示数据**在 `assets/data/demo-issues.json`（8 篇假文章，不是真内容），刻意覆盖了这些边界，方便一眼看出样式问题：
+
+| 覆盖点 | 对应用例 |
+|---|---|
+| 三层分类嵌套 | `Go` / `Go/精选` / `Go/精选/并发` |
+| 多顶层分类 | Go、Java、日常学习、效率工具 |
+| 无标签文章 | 只出现在「全部」，卡片不渲染标签区 |
+| 标签很多 | 4 个标签的换行表现 |
+| 关闭状态 | `state: closed` 显示「已关闭」 |
+| 超长标题 | 卡片换行 + 章节导航省略号 |
+| 空摘要 | 卡片不渲染摘要行 |
+| 标题不足 2 个 | 目录整栏不渲染、不加载 toc.css |
+| 正文元素 | 多级标题、代码块、表格、引用、任务列表、长段落 |
+
+> 这份演示数据放在 `assets/` 下，而 `assets/` 会整个部署到线上，所以站点上也能访问到它（内容是假文章、无隐私）。
+> 构建产物 `pages/blog/**` 在 `.gitignore` 里，**不入库** —— 所以本地怎么折腾都不会影响提交。
+
+> 直接双击 HTML 文件（`file://`）不行：`navbar.js` 注入的样式与简历树的 `fetch` 都需要 HTTP 环境。
+> 构建产物不入库，所以每次拉取最新代码后都要重新跑一次上面的构建命令。
 
 ---
 
