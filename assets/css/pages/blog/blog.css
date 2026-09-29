@@ -186,6 +186,24 @@
     color: var(--color-ink);
 }
 
+/* 作者与日期之间用短横线连接（作者 - 2026-09-29），两处 meta 共用。
+   颜色继承 meta 的 --color-muted，不要用更浅的 --color-border —— 那样横线几乎看不见。 */
+.blog-byline-sep {
+    color: currentColor;
+    /* 容器 gap 是 14px，两侧各收一点，让「作者 - 日期」读起来是一个整体 */
+    margin: 0 -6px;
+}
+
+.blog-byline-author {
+    color: var(--color-ink);
+    text-decoration: none;
+}
+
+a.blog-byline-author:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
 .blog-article-meta {
     display: flex;
     flex-wrap: wrap;

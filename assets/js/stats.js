@@ -506,6 +506,10 @@
     function renderFallback(spec, user, card, body, state) {
         var profileUrl = resolveProfileUrl(user);
 
+        // 按失败原因给不同说法：'error' 是图片加载失败（多为服务端 503/404 或网络拦截），
+        // 'timeout' 是超过 CONFIG.timeoutMs 仍未响应。两者原因不同，提示不该混为一谈。
+        var timeout = state && state.failure === 'timeout';
+
         var panel = document.createElement('div');
         panel.className = 'halo-stats-fallback';
         panel.setAttribute('role', 'status');
@@ -517,13 +521,16 @@
 
         var title = document.createElement('p');
         title.className = 'halo-stats-fallback-title';
-        title.textContent = '该统计服务当前无法访问';
+        title.textContent = timeout ? '统计服务响应超时' : '统计服务暂时不可用';
         panel.appendChild(title);
 
         var desc = document.createElement('p');
         desc.className = 'halo-stats-fallback-desc';
-        desc.textContent = '公共统计图服务在大陆网络下可能超时或被拦截，本卡片暂时无法显示，' +
-            '这不影响本站其它内容。';
+        desc.textContent = timeout
+            ? '公共统计图服务在 ' + Math.round(CONFIG.timeoutMs / 1000) + ' 秒内没有响应，' +
+              '可能是网络较慢或该服务被拦截。可以点「重试」，不影响本站其它内容。'
+            : '公共统计图服务没有返回内容（服务端故障或网络拦截）。' +
+              '卡片位置暂时留空，不影响本站其它内容。';
         panel.appendChild(desc);
 
         var actions = document.createElement('div');

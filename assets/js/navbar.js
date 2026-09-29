@@ -73,6 +73,44 @@
             '    <nav class="halo-nav-menu">' + linksHtml + '</nav>' +
             '</div>';
         document.body.insertBefore(nav, document.body.firstChild);
+
+        initAutoHide(nav);
+    }
+
+    /**
+     * 滚动时自动隐藏 / 显示导航栏（加在 navbar.js 里，所有页面一次生效）。
+     *   · 往下滚 -> 加 .is-hidden，导航栏上移滑出画面
+     *   · 往上滚 -> 移除 .is-hidden，滑回来
+     *
+     * 两个细节：
+     *   1) 顶部一小段距离内始终显示，避免刚进页面轻微滚动就把导航栏弹走；
+     *   2) 刻意**不用 requestAnimationFrame 节流**。因为下面只在状态真正翻转时
+     *      才写 class，本身就不是每帧操作 DOM，没有节流的必要；而 rAF 在后台标签页、
+     *      无头浏览器等场景可能被饿死，反而会让导航栏该隐藏时不隐藏（本项目在
+     *      toc.js 上踩过同一个坑）。
+     */
+    function initAutoHide(nav) {
+        var lastY = window.scrollY || window.pageYOffset || 0;
+        // 在这个距离以内不隐藏，始终显示
+        var TOP_ZONE = 80;
+
+        function update() {
+            var y = window.scrollY || window.pageYOffset || 0;
+            var delta = y - lastY;
+
+            // 忽略几乎不动的抖动（触控板惯性、亚像素滚动）
+            if (Math.abs(delta) < 6) return;
+
+            var shouldHide = delta > 0 && y > TOP_ZONE;
+            lastY = y;
+
+            // 只在状态真的翻转时才碰 class，避免每次滚动都写 DOM
+            if (nav.classList.contains('is-hidden') !== shouldHide) {
+                nav.classList.toggle('is-hidden', shouldHide);
+            }
+        }
+
+        window.addEventListener('scroll', update, { passive: true });
     }
 
     // 脚本置于 body 末尾时立即执行；若被 defer 或放到 head 中，则等 DOM 就绪

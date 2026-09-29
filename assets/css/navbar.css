@@ -25,6 +25,14 @@ body {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     z-index: 900;
     box-sizing: border-box;
+    /* 往下滚隐藏、往上滚滑回，靠 transform 平移，不触发重排 */
+    transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: transform;
+}
+
+/* 往下滚动时由 navbar.js 加上：整条导航栏上移滑出画面 */
+.halo-navbar.is-hidden {
+    transform: translateY(-100%);
 }
 
 /* ---------- 左侧：品牌 + 首页 ---------- */
@@ -80,8 +88,7 @@ body {
     cursor: default;
 }
 
-/* ---------- 窄屏：收紧间距，避免品牌与导航挤在一起 ---------- */
-@media (max-width: 480px) {
+/* ---------- 窄屏：收紧间距，避免品牌与导航挤在一起 ---------- */@media (max-width: 480px) {
     .halo-navbar {
         padding: 0 16px;
     }
@@ -110,6 +117,14 @@ body {
 
     .halo-nav-link {
         font-size: 13px;
+    }
+}
+
+/* ---------- 减弱动态效果：去掉平移动画 ----------
+   隐藏/显示本身是有用的功能，保留；只是改成瞬间切换，不做滑动。 */
+@media (prefers-reduced-motion: reduce) {
+    .halo-navbar {
+        transition: none;
     }
 }
 
