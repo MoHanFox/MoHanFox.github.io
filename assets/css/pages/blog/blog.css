@@ -370,9 +370,16 @@ a.blog-byline-author:hover {
     color: #78beef;
 }
 
-/* 函数名 / 方法名：紧跟 `(` 的标识符，或形如 `fmt.Printf` 里的命名空间段 */
+/* 函数名：紧跟 `(` 的标识符。
+   注意包名/命名空间（`fmt.Printf` 的 fmt、`router.GET` 的 router）**刻意不上色**，
+   保持代码块默认字色，这样一眼能分出「包」与「方法」。 */
 .blog-article .tok-fn {
     color: #d2a8ff;
+}
+
+/* 语义化版本号（v1.7.9 / v2.0.0-rc.1），go.mod 里最常见 */
+.blog-article .tok-version {
+    color: #ffa657;
 }
 
 /* 表格 */
