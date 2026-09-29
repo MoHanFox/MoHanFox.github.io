@@ -326,12 +326,13 @@ a.blog-byline-author:hover {
     color: #b4326b;
 }
 
-/* 代码块 */
+/* 代码块：浅色底，与站点整体气质一致（深色块在浅色页面上过于抢眼） */
 .blog-article pre {
     margin: 0 0 1.4em;
     padding: 18px 20px;
     overflow-x: auto;
-    background: #1a1a2e;
+    background: var(--color-surface-code-alt);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     line-height: 1.7;
 }
@@ -339,8 +340,34 @@ a.blog-byline-author:hover {
 .blog-article pre code {
     padding: 0;
     background: none;
-    color: #e6e9f2;
+    color: var(--color-code-ink);
     font-size: 13px;
+}
+
+/* ---------- 代码高亮 ----------
+   构建时由 scripts/highlight.mjs 生成 .tok-* 标签（访客不下载任何高亮脚本）。
+   配色规则：关键词紫、字符串绿、注释灰、数字橙、类型蓝 —— 全部在这一个块里，
+   想换配色只改这里即可。对比度都按浅底 (#f3f4f6) 调过。 */
+.blog-article .tok-keyword {
+    color: #fd7a71;
+    font-family: var(--font-medium);
+}
+
+.blog-article .tok-string {
+    color: #7de586;
+}
+
+.blog-article .tok-comment {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.blog-article .tok-number {
+    color: #78befd;
+}
+
+.blog-article .tok-type {
+    color: #78beef;
 }
 
 /* 表格 */

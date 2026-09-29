@@ -24,6 +24,8 @@ import path from 'node:path';
 
 import { Marked } from 'marked';
 
+import { highlightCode } from './highlight.mjs';
+
 const require = createRequire(import.meta.url);
 
 // ---------------------------------------------------------------------------
@@ -409,6 +411,24 @@ export function renderMarkdown(md, options) {
         }
 
         return `<h${token.depth} id="${escapeHtml(id)}">${inner}</h${token.depth}>\n`;
+      },
+
+      /**
+       * 围栏代码块：做构建时语法高亮。
+       *
+       * 注意 marked **在调用渲染器之前就已经转义**了 token.text
+       * （`<` 变 `&lt;`、`"` 变 `&quot;`），所以 highlightCode 内部是
+       * 「先解码 → 高亮 → 再统一转义」，避免出现 `&amp;lt;` 这种双重转义。
+       *
+       * 语言标识挂在 token.lang 上（实测字段为 type/raw/lang/text），
+       * 形如 "go"、"java"；可能带额外参数（```go title=x），只取第一段。
+       */
+      code(token) {
+        const lang = String(token.lang || '').trim().split(/\s+/)[0] || '';
+        const highlighted = highlightCode(token.text, lang);
+        // 未标注语言时不加 language-* 类，避免生成无意义的 class="language-"
+        const cls = lang ? ` class="language-${escapeHtml(lang)}"` : '';
+        return `<pre><code${cls}>${highlighted}</code></pre>\n`;
       }
     }
   });
