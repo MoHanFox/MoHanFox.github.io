@@ -183,6 +183,37 @@
         } catch (error) {
             // 例如 file:// 下的异常：筛选照常工作，只是不同步到地址栏
         }
+        saveFilterState();
+    }
+
+    /**
+     * 把筛选状态也存进 sessionStorage。
+     *
+     * 为什么光靠 URL 不够：文章底部的「返回博客列表」href 是 `./index.html`，
+     * 导航栏的「博客」href 是 `../../pages/blog/` —— **两者都不带 query**，
+     * 于是 `?cat=…` 在跳转时就丢了，回到列表变成「全部」。
+     * 浏览器返回之所以正常，是因为它恢复的是完整的前一个 URL。
+     *
+     * 所以这里额外存一份，在「回列表」时兜底（见 adoptStoredFilter）。
+     */
+    function saveFilterState() {
+        try {
+            window.sessionStorage.setItem(FILTER_KEY, JSON.stringify({
+                cat: state.cat, query: state.query, scope: state.scope
+            }));
+        } catch (error) {
+            // 存储不可用时不影响筛选本身
+        }
+    }
+
+    /** 读取上次的筛选状态 */
+    function storedFilter() {
+        try {
+            var saved = JSON.parse(window.sessionStorage.getItem(FILTER_KEY) || 'null');
+            return saved && typeof saved === 'object' ? saved : null;
+        } catch (error) {
+            return null;
+        }
     }
 
     /* ---------------- 分类侧栏交互 ---------------- */
@@ -310,6 +341,7 @@
 
     var EXPANDED_KEY = 'halo:blog:expanded';
     var SCROLL_KEY = 'halo:blog:scroll';
+    var FILTER_KEY = 'halo:blog:filter';
 
     function groupKey(group) {
         if (!group) return '';
@@ -480,15 +512,40 @@
         if (document.visibilityState === 'hidden') saveScroll();
     });
 
+    /**
+     * 回列表时，若地址栏没有筛选参数，就用上次存的兜底。
+     *
+     * 注意只在 shouldRestoreOnLoad() 为真时调用 —— 从首页/站外主动进列表
+     * 不该被上次的筛选影响，那种情况应该看到全部文章。
+     * 逐个字段判断：URL 里有的以 URL 为准，缺的才用存储补。
+     */
+    function adoptStoredFilter() {
+        var saved = storedFilter();
+        if (!saved) return;
+        try {
+            var params = new URL(window.location.href).searchParams;
+            // URL 里没带 cat 且存储里有 → 补上（这正是「点按钮回列表」的情况）
+            if (!params.get('cat') && saved.cat) state.cat = String(saved.cat);
+            if (!params.get('q') && saved.query) state.query = normalize(saved.query);
+            if (!params.get('scope') && saved.scope === 'content') state.scope = 'content';
+        } catch (error) {
+            // 解析失败就保持 URL 的结果
+        }
+    }
+
     /* ---------------- 初始化 ---------------- */
 
     readUrl();
+    if (shouldRestoreOnLoad()) adoptStoredFilter();
     if (input) input.value = state.query;
     if (scopeSelect) scopeSelect.value = state.scope;
     syncPlaceholder();
     restoreExpanded();
     if (state.cat) revealAncestors(state.cat);
     apply(false);
+    // 若从存储里补回了筛选（例如点「返回博客列表」按钮回来），
+    // 把地址栏同步回去，这样刷新/分享链接也带上筛选，不会看起来「没生效」。
+    if (state.cat || state.query) syncUrl();
     // 恢复品读位置：放在 apply 之后，此时筛选已应用、列表高度基本确定
     restoreOnFirstLoad();
 })();
