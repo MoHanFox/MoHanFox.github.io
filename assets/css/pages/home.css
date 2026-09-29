@@ -1,0 +1,34 @@
+/* ============================================================
+   pages/home.css — 首页（index.html）专用样式
+   只写本页独有规则；全局重置在 base.css，通用组件在 components.css
+   ============================================================ */
+
+.home-hello {
+    font-family: var(--font-bold);
+    font-size: 42px;
+    color: var(--color-ink);
+    letter-spacing: 4px;
+}
+
+.home-sub {
+    margin-top: 14px;
+    font-size: 15px;
+    color: var(--color-muted);
+    letter-spacing: 1px;
+}
+
+/* ------------------------------------------------------------
+   备用视觉资源：assets/img/welcome.png
+   原 .Page_Background 规则引用路径错误（跳出了站点根）且未在页面启用，
+   故未保留。需要启用时按下列写法自行添加到 <body> 中：
+
+   <div class="page-background"></div>
+
+   .page-background {
+       position: fixed;
+       inset: 0;
+       background: url('../../img/welcome.png') center / cover no-repeat fixed;
+       z-index: -1;
+       pointer-events: none;
+   }
+   ------------------------------------------------------------ */

@@ -1,0 +1,98 @@
+/* ============================================================
+   pages/home/base.css — 主页通用：区块节奏、标题、滚动入场
+   依赖：assets/css/base.css（设计令牌）
+   ============================================================ */
+
+/* 主页是纵向流式布局，取消全局 body 的垂直居中 */
+body.page-home {
+    display: block;
+    min-height: 0;
+}
+
+/* 默认锚点平滑滚动；下方在“减弱动态效果”时关闭 */
+html {
+    scroll-behavior: smooth;
+}
+
+/* 区块：统一左右留白与纵向节奏 */
+.section-inner {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 28px;
+}
+
+/* 区块标题组 */
+.section-head {
+    margin-bottom: 40px;
+}
+
+.section-kicker {
+    margin: 0 0 8px;
+    font-family: var(--font-medium);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--color-primary);
+}
+
+.section-title {
+    margin: 0;
+    font-family: var(--font-bold);
+    font-size: 30px;
+    letter-spacing: 2px;
+    color: var(--color-ink);
+}
+
+.section-desc {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
+/* ---------- 滚动入场动画 ----------
+   默认可见；只有脚本确认自己可用并加上 .js-reveal 后才隐藏等待入场。
+   这样 JS 未加载/被拦截/报错时，正文依然完整可读。 */
+.js-reveal [data-animate] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.js-reveal [data-animate].is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* 减弱动态效果：动画与本页平滑滚动一并关闭 */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .js-reveal [data-animate],
+    .js-reveal [data-animate].is-visible {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .hero-cursor {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-inner {
+        padding: 0 20px;
+    }
+
+    .section-title {
+        font-size: 24px;
+    }
+
+    .section-head {
+        margin-bottom: 28px;
+    }
+}

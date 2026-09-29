@@ -1,0 +1,27 @@
+# ---- IDE / 编辑器 ----
+.idea/
+.vscode/
+*.iml
+*.swp
+*~
+
+# ---- 操作系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 日志与临时文件 ----
+*.log
+*.tmp
+.tmp/
+
+# ---- 本机预览与工具缓存 ----
+.cache/
+node_modules/
+
+# ---- 博客构建产物 ----
+# 这些页面由 GitHub Actions 在构建时生成（见 .github/workflows/blog.yml），
+# 源码分支不需要保存，避免机器人生成的内容与源码混在一起。
+pages/blog/index.html
+pages/blog/post-*.html
+pages/blog/data/

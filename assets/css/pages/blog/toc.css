@@ -1,0 +1,157 @@
+/* ============================================================
+   pages/blog/toc.css — 文章页右侧章节导航
+   竖向排列的 `-` 刻度 + 标题，点击定位、滚动高亮，
+   与 DeepSeek 对话界面右侧的对话导航同一思路。
+   ============================================================ */
+
+.blog-toc {
+    display: none;
+}
+
+.blog-toc-title {
+    margin: 0 0 12px;
+    padding-left: 18px;
+    font-family: var(--font-medium);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--color-muted);
+}
+
+.blog-toc-nav {
+    position: relative;
+    max-height: 62vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* 贯穿的细竖线 */
+.blog-toc-nav::before {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--color-border);
+}
+
+.blog-toc-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* 缩进用 padding，这样各层级的刻度仍对齐在同一条竖线上 */
+.blog-toc-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 5px 6px 5px 18px;
+    font-family: var(--font-light);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+/* 刻度：短横线，就是需求里的 `-`，颜色与字号无关，保证各层级对齐 */
+.blog-toc-tick {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 11px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--color-border);
+    transform: translateY(-50%);
+    transition: background 0.2s ease, width 0.2s ease;
+}
+
+.blog-toc-label {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.blog-toc-link:hover {
+    color: var(--color-ink);
+}
+
+.blog-toc-link:hover .blog-toc-tick {
+    background: var(--color-muted);
+}
+
+.blog-toc-link.is-active {
+    color: var(--color-primary);
+    font-family: var(--font-medium);
+}
+
+.blog-toc-link.is-active .blog-toc-tick {
+    width: 15px;
+    background: var(--color-primary);
+}
+
+/* 层级缩进：标签右移，刻度不动 */
+.blog-toc-item--3 .blog-toc-link {
+    padding-left: 30px;
+    font-size: 12.5px;
+}
+
+.blog-toc-item--4 .blog-toc-link,
+.blog-toc-item--5 .blog-toc-link,
+.blog-toc-item--6 .blog-toc-link {
+    padding-left: 42px;
+    font-size: 12px;
+}
+
+/* ---------- 宽屏：固定在正文右侧、垂直居中 ----------
+   断点取 1500px：正文容器宽 860px 且水平居中，窗口窄于这个值时
+   右侧剩余空间不足以放下 210px 的目录，会压到正文。 */
+@media (min-width: 1500px) {
+    .blog-toc {
+        display: block;
+        position: fixed;
+        top: 50%;
+        right: 30px;
+        width: 210px;
+        max-height: 66vh;
+        overflow-y: auto;
+        transform: translateY(-50%);
+        z-index: 10;
+    }
+}
+
+/* ---------- 中等宽度：贴在正文上方 ----------
+   用与 .blog-wrap 相同的内边距与最大宽度，保证目录卡和正文左右对齐。 */
+@media (min-width: 769px) and (max-width: 1499px) {
+    .blog-toc {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 860px;
+        margin: 56px auto 0;
+        padding: 0 28px;
+    }
+
+    .blog-toc-nav {
+        max-height: none;
+    }
+
+    .blog-toc-title {
+        padding-left: 0;
+    }
+
+    /* 贴在正文上方时，多层级的缩进收敛一些 */
+    .blog-toc-item--3 .blog-toc-link {
+        padding-left: 26px;
+    }
+
+    .blog-toc-item--4 .blog-toc-link,
+    .blog-toc-item--5 .blog-toc-link,
+    .blog-toc-item--6 .blog-toc-link {
+        padding-left: 34px;
+    }
+}

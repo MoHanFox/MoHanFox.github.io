@@ -1,0 +1,18 @@
+{
+  "name": "mohanfox-github-io",
+  "version": "1.0.0",
+  "private": true,
+  "description": "个人主页与博客站的构建脚本依赖（站本身是纯静态，无需打包）",
+  "type": "module",
+  "scripts": {
+    "build:issues": "node scripts/build-issues.mjs",
+    "build:blog": "node scripts/build-blog.mjs",
+    "build": "node scripts/build-issues.mjs && node scripts/build-blog.mjs"
+  },
+  "dependencies": {
+    "marked": "^18.0.14"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

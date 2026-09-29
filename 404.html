@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暂无内容 · 漠寒 MOHAN</title>
+    <meta name="description" content="这个页面不存在，或对应的内容已下线。">
+    <!-- 不要被搜索引擎收录这一页 -->
+    <meta name="robots" content="noindex">
+
+    <!-- 全局样式：base（字体+令牌）→ components（通用组件）→ navbar（导航栏） -->
+    <link rel="stylesheet" href="/assets/css/base.css">
+    <link rel="stylesheet" href="/assets/css/components.css">
+    <link rel="stylesheet" href="/assets/css/navbar.css">
+    <link rel="stylesheet" href="/assets/css/pages/blog/blog.css">
+
+    <style>
+        /* 只服务这一页，就近写在页面里，避免为一个静态页多引一个 CSS 文件 */
+        .notfound {
+            width: 100%;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 96px 28px 120px;
+        }
+
+        .notfound-code {
+            margin: 18px 0 0;
+            font-family: var(--font-bold);
+            font-size: 64px;
+            line-height: 1;
+            letter-spacing: 4px;
+            color: var(--color-border);
+        }
+
+        .notfound-title {
+            margin: 14px 0 0;
+            font-family: var(--font-bold);
+            font-size: clamp(24px, 4vw, 32px);
+            letter-spacing: 2px;
+            color: var(--color-ink);
+        }
+
+        .notfound-desc {
+            margin: 16px 0 0;
+            font-size: 15px;
+            line-height: 1.95;
+            color: var(--color-muted);
+        }
+
+        /* 只有指向博客文章 / 博客目录时才显示的补充说明 */
+        .notfound-blog-hint {
+            margin: 10px 0 0;
+            font-size: 14px;
+            line-height: 1.9;
+            color: var(--color-muted);
+        }
+
+        .notfound-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 34px;
+        }
+
+        .notfound-actions .HaloButton {
+            width: auto;
+            min-width: 132px;
+            padding: 0 20px;
+            text-decoration: none;
+        }
+
+        .notfound-hint {
+            margin-top: 40px;
+            font-family: var(--font-light);
+            font-size: 13px;
+            color: var(--color-muted);
+        }
+
+        .notfound-hint code {
+            padding: 1px 6px;
+            border-radius: var(--radius-sm);
+            background: var(--color-surface-alt);
+            font-family: Consolas, Monaco, monospace;
+            font-size: 12px;
+            color: var(--color-ink);
+        }
+
+        @media (max-width: 768px) {
+            .notfound {
+                padding: 64px 20px 88px;
+            }
+
+            .notfound-code {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body class="page-blog">
+
+    <main class="notfound">
+        <span class="blog-badge">页面不存在</span>
+        <p class="notfound-code">404</p>
+        <h1 class="notfound-title">这里暂无内容</h1>
+        <p class="notfound-desc">
+            你访问的地址没有对应的页面。可能是链接输错了，或者这个页面已经不再存在。
+        </p>
+        <p class="notfound-blog-hint" data-blog-hint hidden>
+            如果你是在找某篇博客文章：文章内容来自本仓库的 GitHub Issues，
+            某个 Issue 被取消 <code>blog</code> 标签或删除后，对应的文章页也会一并下线。
+        </p>
+
+        <div class="notfound-actions">
+            <a class="HaloButton primary" href="/index.html">回到首页</a>
+            <a class="HaloButton" href="/pages/blog/index.html">前往博客</a>
+        </div>
+
+        <p class="notfound-hint">
+            也想看看源码？<a href="https://github.com/MoHanFox/MoHanFox.github.io" target="_blank" rel="noopener">MoHanFox.github.io</a>
+        </p>
+    </main>
+
+    <!-- 通用导航栏（本页位于站点根目录） -->
+    <script src="/assets/js/navbar.js"></script>
+    <script>
+        // 只有「指向博客的失效链接」才补一句解释，避免所有 404 都堆一大段说明
+        (function () {
+            'use strict';
+            if (!/\/pages\/blog\//.test(window.location.pathname)) return;
+            var hint = document.querySelector('[data-blog-hint]');
+            if (hint) hint.removeAttribute('hidden');
+        })();
+    </script>
+</body>
+</html>

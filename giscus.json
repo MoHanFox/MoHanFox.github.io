@@ -1,0 +1,28 @@
+{
+  "_readme": [
+    "giscus 评论配置（评论数据存在 GitHub Discussions 里，无需后端、无追踪）。",
+    "",
+    "启用步骤：",
+    "  1. 仓库 Settings → General → Features 勾选 Discussions；",
+    "  2. 给仓库安装 giscus App：https://github.com/apps/giscus （不装的话访客无法评论）；",
+    "  3. 在 Discussions 里新建一个分类，类型建议选 Announcements（只有维护者与 giscus 能发帖）；",
+    "  4. 打开 https://giscus.app ，填仓库名后它会显示配置；把页面上的",
+    "     data-category 与 data-category-id 两个值抄到下面（repo 与 repoId 已帮你填好）。",
+    "",
+    "填好后重新构建（node scripts/build-blog.mjs）即可，文章页底部会出现评论区。",
+    "不想开评论就把 enabled 改成 false。"
+  ],
+  "enabled": true,
+  "repo": "MoHanFox/MoHanFox.github.io",
+  "repoId": "R_kgDOUaoChQ",
+  "category": "",
+  "categoryId": "",
+  "mapping": "pathname",
+  "strict": false,
+  "reactionsEnabled": true,
+  "emitMetadata": false,
+  "inputPosition": "bottom",
+  "theme": "preferred_color_scheme",
+  "lang": "zh-CN",
+  "loading": "lazy"
+}

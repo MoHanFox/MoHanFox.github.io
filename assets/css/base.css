@@ -1,0 +1,102 @@
+/* ============================================================
+   base.css — 全局基础层
+   职责：1) 声明 @font-face 字体族  2) 设计令牌（颜色/字体/尺寸）
+        3) 全局重置与 body 默认排版
+   引用方：所有页面（由 navbar.js 自动注入，或页面手动 <link>）
+   路径基准：本文件位于 assets/css/，故资源引用为 ../fonts/...
+   ============================================================ */
+
+/* ---------- 1. 字体族（文件位于 assets/fonts/） ---------- */
+@font-face {
+    font-family: 'oppoSansRegular';
+    src: url('../fonts/oplus-sans-3-regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'oppoSansMedium';
+    src: url('../fonts/oplus-sans-3-medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'oppoSansLight';
+    src: url('../fonts/oplus-sans-3-light.ttf') format('truetype');
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'oppoSansBold';
+    src: url('../fonts/oplus-sans-3-bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+}
+
+/* ExtraLight 备而不用：字体文件已随仓库保留，需要时取消注释即可
+@font-face {
+    font-family: 'oppoSansExtraLight';
+    src: url('../fonts/oplus-sans-3-extralight.ttf') format('truetype');
+    font-weight: 200;
+    font-display: swap;
+}
+*/
+
+/* ---------- 2. 设计令牌 ---------- */
+:root {
+    /* 品牌色 */
+    --color-primary: #2d6bef;
+    --color-primary-hover: #357abd;
+    --color-primary-soft: #ebf4ff;
+
+    /* 中性色 */
+    --color-ink: #1a1a2e;
+    --color-muted: #6b7280;
+    --color-placeholder: #afb7c1;
+    --color-border: #e2e8f0;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f3f4f6;
+
+    /* 字体族 */
+    --font-regular: 'oppoSansRegular', sans-serif;
+    --font-medium: 'oppoSansMedium', sans-serif;
+    --font-light: 'oppoSansLight', sans-serif;
+    --font-bold: 'oppoSansBold', sans-serif;
+
+    /* 尺寸 */
+    --navbar-height: 56px;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-pill: 20px;
+
+    /* 过渡 */
+    --ease-base: all 0.25s ease;
+}
+
+/* ---------- 3. 全局重置与默认排版 ---------- */
+
+/* 统一 border-box：否则「width:100% + 内边距」的区块会撑出横向滚动条 */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-regular);
+    color: var(--color-ink);
+    background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 横向兜底：个别超宽内容不应让整页可以左右拖动 */
+html {
+    overflow-x: hidden;
+}

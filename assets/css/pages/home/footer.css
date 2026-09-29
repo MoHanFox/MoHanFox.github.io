@@ -1,0 +1,50 @@
+/* ============================================================
+   pages/home/footer.css — 第 4 屏：页脚简笔小猫
+   ============================================================ */
+
+.site-foot {
+    padding: 96px 20px 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.foot-cat {
+    width: 200px;
+    max-width: 62vw;
+    height: auto;
+    color: var(--color-ink);
+    opacity: 0.85;
+}
+
+.foot-note {
+    margin: 26px 0 0;
+    font-family: var(--font-light);
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: var(--color-muted);
+}
+
+.foot-top {
+    margin-top: 30px;
+    font-family: var(--font-light);
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.foot-top:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .site-foot {
+        padding: 64px 16px 52px;
+    }
+
+    .foot-cat {
+        width: 160px;
+    }
+}

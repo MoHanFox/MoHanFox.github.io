@@ -1,0 +1,79 @@
+/* ============================================================
+   pages/blog/giscus.css — 文章页底部的评论区
+   评论内容由 giscus 以 iframe 嵌入，此处只负责外层容器与说明卡片。
+   ============================================================ */
+
+.blog-comments {
+    margin-top: 46px;
+    padding-top: 30px;
+    border-top: 1px solid var(--color-border);
+}
+
+.blog-comments-title {
+    margin: 0 0 20px;
+    font-family: var(--font-medium);
+    font-size: 17px;
+    letter-spacing: 1px;
+    color: var(--color-ink);
+}
+
+/* giscus 自己会往 .giscus 容器里塞 iframe */
+.giscus {
+    width: 100%;
+}
+
+.giscus-frame {
+    width: 100%;
+    border: 0;
+}
+
+/* ---------- 未配置时的引导卡片（只在站点尚未配好 giscus 时出现） ---------- */
+.blog-comments-setup {
+    padding: 22px 24px;
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.blog-comments-setup-title {
+    margin: 0;
+    font-family: var(--font-medium);
+    font-size: 15px;
+    color: var(--color-ink);
+}
+
+.blog-comments-setup-desc {
+    margin: 10px 0 0;
+    font-size: 13.5px;
+    line-height: 1.9;
+    color: var(--color-muted);
+}
+
+.blog-comments-setup-steps {
+    margin: 14px 0 0;
+    padding-left: 1.3em;
+    font-size: 13.5px;
+    line-height: 2;
+    color: var(--color-muted);
+}
+
+.blog-comments-setup-steps code,
+.blog-comments-setup-desc code {
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-alt);
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    color: var(--color-ink);
+}
+
+.blog-comments-setup code {
+    word-break: break-all;
+}
+
+@media (max-width: 768px) {
+    .blog-comments {
+        margin-top: 34px;
+        padding-top: 24px;
+    }
+}

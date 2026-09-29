@@ -1,0 +1,309 @@
+/* ============================================================
+   pages/home/resume.css — 第 3 屏：个人简历树
+   要求：从上往下滑动；主干在板块左端；支持子级（子级在父级下方）；
+        板块右上角有「跳至最下」。
+   数据结构由 assets/data/resume.json 提供，见 README。
+   ============================================================ */
+
+.resume {
+    padding: 110px 0;
+}
+
+/* ---------- 标题行：左标题 + 右上角跳转 ---------- */
+.section-head--row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.resume-jump {
+    flex: 0 0 auto;
+    margin-bottom: 4px;
+    padding: 7px 16px;
+    border: 1px solid rgba(45, 107, 239, 0.35);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-medium);
+    font-size: 13px;
+    color: var(--color-primary);
+    text-decoration: none;
+    background: rgba(45, 107, 239, 0.06);
+    transition: var(--ease-base);
+    white-space: nowrap;
+}
+
+.resume-jump:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
+}
+
+/* ---------- 概览卡 ---------- */
+.resume-profile {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 28px;
+    padding: 22px 26px;
+    margin-bottom: 54px;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 26px rgba(26, 26, 46, 0.05);
+}
+
+.resume-profile-name {
+    margin: 0;
+    font-family: var(--font-bold);
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--color-ink);
+}
+
+.resume-profile-title {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
+.resume-profile-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.resume-profile-link {
+    padding: 7px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-medium);
+    font-size: 13px;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: var(--ease-base);
+}
+
+.resume-profile-link:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+}
+
+/* ---------- 树本体：主干在左端，靠 ul 缩进形成层级 ---------- */
+.resume-tree {
+    position: relative;
+    padding-left: 34px;
+}
+
+/* 主干线：纯色。改用纯色而非渐变，是为了让节点方块能取到与线完全相同的色值
+   —— 渐变下同一条线在不同高度颜色不同，方块无法与之匹配。 */
+.resume-tree::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    border-radius: 2px;
+    background: rgba(45, 107, 239, 0.32);
+}
+
+.resume-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* 子级：相对父级缩进，并带自己的分支线 */
+.resume-children {
+    position: relative;
+    margin: 6px 0 0 7px;
+    padding-left: 26px;
+}
+
+.resume-children::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 16px;
+    width: 2px;
+    border-radius: 2px;
+    background: rgba(45, 107, 239, 0.32);
+}
+
+/* 分支横线：从子级竖线连到节点方块 */
+.resume-children::after {
+    content: "";
+    position: absolute;
+    top: 19px;
+    left: 0;
+    width: 19px;
+    height: 2px;
+    background: rgba(45, 107, 239, 0.32);
+}
+
+.resume-node {
+    position: relative;
+}
+
+.resume-item {
+    position: relative;
+    padding: 13px 0 13px 26px;
+}
+
+/* 节点标记：正方形，颜色与紧邻的那条线取同一色值 rgba(45,107,239,.32)
+   （主干线、子级竖线与分支线现在同为纯色，因此方块能与线完全一致）
+   父级保留白底描边以便与子级实心方块区分；子级为实心。 */
+.resume-dot {
+    position: absolute;
+    left: -23px;
+    top: 20px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid rgba(45, 107, 239, 0.32);
+    border-radius: 0;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+/* 子级正方形：实心，与线同色。
+   必须去掉描边——10px 的盒子若带 3px 描边，四边会在内部交叠，
+   实际观感比单层线条更实、颜色更深。 */
+.resume-children .resume-dot {
+    left: -22px;
+    border: 0;
+    background: rgba(45, 107, 239, 0.32);
+}
+
+.resume-item-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 14px;
+}
+
+.resume-item-title {
+    margin: 0;
+    font-family: var(--font-medium);
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    color: var(--color-ink);
+}
+
+.resume-item-time {
+    font-family: var(--font-light);
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+.resume-item-desc {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--color-muted);
+}
+
+.resume-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.resume-tag {
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    font-family: var(--font-light);
+    font-size: 12px;
+    color: var(--color-primary);
+}
+
+/* 状态提示 / 错误提示（数据载入失败时显示，不影响其它区块） */
+.resume-status {
+    margin: 0;
+    padding: 18px 20px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
+.resume-status--error a {
+    color: var(--color-primary);
+}
+
+/* ---------- 小屏 ---------- */
+@media (max-width: 768px) {
+    .resume {
+        padding: 76px 0;
+    }
+
+    .section-head--row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .resume-profile {
+        margin-bottom: 36px;
+        padding: 18px 20px;
+    }
+
+    .resume-tree {
+        padding-left: 24px;
+    }
+
+    .resume-children {
+        margin-left: 4px;
+        padding-left: 18px;
+    }
+
+    .resume-children::after {
+        width: 13px;
+    }
+
+    .resume-item {
+        padding-left: 20px;
+    }
+
+    .resume-dot {
+        left: -17px;
+    }
+
+    .resume-children .resume-dot {
+        left: -16px;
+    }
+
+    .resume-item-title {
+        font-size: 16px;
+    }
+}
+
+/* ---------- 打印：简历需要能干净地打印出来 ---------- */
+@media print {
+    .site-foot,
+    .resume-jump {
+        display: none;
+    }
+
+    .resume {
+        padding: 0;
+    }
+
+    .resume-tree::before,
+    .resume-children::before,
+    .resume-children::after {
+        background: #999999;
+    }
+
+    .resume-dot {
+        border-color: #666666;
+        background: #ffffff;
+    }
+
+    /* 子级方块是无描边的实心块，打印时需单独给底色 */
+    .resume-children .resume-dot {
+        background: #666666;
+    }
+}

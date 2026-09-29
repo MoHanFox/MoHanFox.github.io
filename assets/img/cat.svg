@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" width="200" height="180"
+     role="img" aria-label="简笔小猫">
+    <!-- 主体：实心近黑剪影；面部特征与腿用背景色挖出线条感（"简笔"的处理方式） -->
+    <g stroke="none">
+        <!-- 尾巴 -->
+        <path d="M146 108 C166 98 172 78 162 59"
+              fill="none" stroke="rgba(26, 26, 46, 0.92)" stroke-width="7" stroke-linecap="round"/>
+        <!-- 身体 -->
+        <ellipse cx="100" cy="106" rx="45" ry="22" fill="rgba(26, 26, 46, 0.92)"/>
+        <!-- 四肢 -->
+        <rect x="68" y="100" width="11" height="27" rx="5" fill="rgba(26, 26, 46, 0.92)"/>
+        <rect x="92" y="102" width="11" height="25" rx="5" fill="rgba(26, 26, 46, 0.92)"/>
+        <rect x="119" y="100" width="11" height="27" rx="5" fill="rgba(26, 26, 46, 0.92)"/>
+        <rect x="138" y="98" width="11" height="29" rx="5" fill="rgba(26, 26, 46, 0.92)"/>
+        <!-- 耳朵 -->
+        <path d="M74 46 L70 22 L92 36 Z" fill="rgba(26, 26, 46, 0.92)"/>
+        <path d="M126 46 L130 22 L108 36 Z" fill="rgba(26, 26, 46, 0.92)"/>
+        <!-- 头部 -->
+        <circle cx="100" cy="61" r="31" fill="rgba(26, 26, 46, 0.92)"/>
+    </g>
+
+    <!-- 面部：卡其色挖线 -->
+    <g fill="rgba(255, 255, 255, 0.86)">
+        <circle cx="87" cy="59" r="3.4"/>
+        <circle cx="113" cy="59" r="3.4"/>
+        <path d="M100 67 L95 72 L105 72 Z"/>
+    </g>
+    <g fill="none" stroke="rgba(255, 255, 255, 0.72)" stroke-width="1.8" stroke-linecap="round">
+        <path d="M62 62 L76 64"/>
+        <path d="M62 72 L76 70"/>
+        <path d="M124 64 L138 62"/>
+        <path d="M124 70 L138 72"/>
+    </g>
+</svg>

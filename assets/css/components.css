@@ -1,0 +1,101 @@
+/* ============================================================
+   components.css — 通用组件层
+   职责：可复用的 UI 原子件，与具体页面无关
+   当前包含：.HaloInput 输入框 / .HaloButton 按钮 / .copyRight 版权注脚
+   说明：首页尚未使用前两者，保留供后续表单页（登录、注册等）直接复用
+   ============================================================ */
+
+/* ---------- 输入框 ---------- */
+.HaloInput {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+    outline: none;
+    transition: var(--ease-base);
+    box-sizing: border-box;
+    font-family: var(--font-light);
+}
+
+/* 聚焦状态 */
+.HaloInput:focus {
+    border-color: var(--color-primary);
+    background-color: var(--color-surface);
+}
+
+/* 占位文字 */
+.HaloInput::placeholder {
+    color: var(--color-placeholder);
+    font-weight: 400;
+}
+
+.HaloInput:disabled {
+    color: #f3f4f6;
+}
+
+/* ---------- 按钮 ---------- */
+.HaloButton {
+    width: 100%;
+    height: 40px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    background-color: var(--color-surface-alt);
+    cursor: pointer;
+    transition: var(--ease-base);
+    box-sizing: border-box;
+    font-family: inherit;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.HaloButton:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-soft);
+    color: #2b6cb0;
+}
+
+.HaloButton:active {
+    transform: scale(0.98);
+}
+
+.HaloButton.primary {
+    background-color: #4a90d9;
+    border-color: #4a90d9;
+    color: #ffffff;
+}
+
+.HaloButton.primary:hover {
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+    color: #ffffff;
+}
+
+/* ---------- 版权注脚 ---------- */
+.copyRight {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    color: #cccccc;
+    text-align: center;
+    padding: 14px 20px;
+    z-index: 999;
+}
+
+.copyRight::after {
+    content: "© 2026 漠寒 MOHAN · 保留所有权利";
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #cccccc;
+    font-family: var(--font-light);
+}
