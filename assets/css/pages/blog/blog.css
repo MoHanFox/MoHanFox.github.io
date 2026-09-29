@@ -370,6 +370,11 @@ a.blog-byline-author:hover {
     color: #78beef;
 }
 
+/* 函数名 / 方法名：紧跟 `(` 的标识符，或形如 `fmt.Printf` 里的命名空间段 */
+.blog-article .tok-fn {
+    color: #d2a8ff;
+}
+
 /* 表格 */
 .blog-article table {
     width: 100%;

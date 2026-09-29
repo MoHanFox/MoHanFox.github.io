@@ -131,11 +131,53 @@ Object.keys(KEYWORDS).forEach((lang) => { KEYWORD_SETS[lang] = toSet(KEYWORDS[la
 const TYPE_SETS = {};
 Object.keys(TYPES).forEach((lang) => { TYPE_SETS[lang] = toSet(TYPES[lang]); });
 
-/** 归一化语言名 */
+/** 源码文件扩展名 → 语言标识（用于「围栏写成文件名」的兜底） */
+const EXT_TO_LANG = {
+    go: 'go', mod: 'go', sum: 'go',
+    java: 'java', kt: 'java',
+    js: 'javascript', mjs: 'javascript', cjs: 'javascript',
+    ts: 'typescript', tsx: 'typescript',
+    py: 'python',
+    cs: 'csharp',
+    cpp: 'cpp', cc: 'cpp', cxx: 'cpp', hpp: 'cpp', h: 'c', c: 'c',
+    rs: 'rust',
+    sh: 'shell', bash: 'shell',
+    sql: 'sql',
+    yml: 'yaml', yaml: 'yaml',
+    json: 'json',
+    html: 'html', htm: 'html',
+    css: 'css'
+};
+
+/**
+ * 归一化语言名。
+ *
+ * 除了别名映射，还要处理**写成文件名**的情况：写 Issue 时很容易把围栏写成
+ * ```main.go（本仓库的文章里真的出现过 `mian.go`），
+ * 那样查表查不到，整块代码就一点颜色都没有。所以先看扩展名，再看首段。
+ */
 export function normalizeLang(lang) {
     const raw = String(lang || '').trim().toLowerCase();
     if (!raw) return '';
-    return LANG_ALIAS[raw] || raw;
+
+    // 1) 本身就是已知标识 / 别名
+    if (LANG_ALIAS[raw]) return LANG_ALIAS[raw];
+    if (KEYWORD_SETS[raw] || TYPE_SETS[raw]) return raw;
+
+    // 2) 形态像文件名（`main.go` / `go.mod` / `a/b/c.java`）：按扩展名认
+    const fileMatch = /^[\w./+-]+\.([a-z0-9]+)$/.exec(raw);
+    if (fileMatch) {
+        const byExt = EXT_TO_LANG[fileMatch[1]];
+        if (byExt) return byExt;
+    }
+
+    // 3) 取首段（`mian.go` -> `mian`）看能否命中；命中不了就原样返回（上层按未知语言处理）
+    const head = raw.split(/[.\s/]/)[0];
+    if (head && (LANG_ALIAS[head] || KEYWORD_SETS[head] || TYPE_SETS[head])) {
+        return LANG_ALIAS[head] || head;
+    }
+
+    return raw;
 }
 
 /** 支持高亮的语言（用于判断是否值得包 span，未支持的语言直接原样转义输出） */
@@ -144,12 +186,17 @@ export function isSupported(lang) {
     return Boolean(KEYWORD_SETS[key] || TYPE_SETS[key]);
 }
 
-/** 单次扫描用的组合正则。顺序很重要：注释必须在运算符之前，否则 // 会被当成除号 */
+/* 单次扫描用的组合正则。顺序很重要：
+   1) 注释必须在运算符之前，否则 `//` 会被当成除号；
+   2) 标识符分支要尽力匹配「函数名/方法名」的形状后再回退到普通标识符，
+      否则 `fmt.Printf` 里的 Printf 拿不到函数名高亮。 */
 const TOKEN_RE = new RegExp([
     '(?<comment>\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/|#[^\\n]*)',
     '(?<triple>"{{3}|\\\'{{3}})',
     '(?<string>"(?:\\\\.|[^"\\\\\\n])*"|\\\'(?:\\\\.|[^\\\'\\\\\\n])*\\\'|`(?:\\\\.|[^`\\\\])*`)',
     '(?<number>\\b(?:0[xXbBoO][0-9a-fA-F_]+|\\d[\\d_]*(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)\\b)',
+    // 函数名 / 方法名：后面紧跟 `(`，或形如 `foo.bar`（前一段是命名空间）
+    '(?<fn>[A-Za-z_$][A-Za-z0-9_$]*\\s*(?=\\()|[A-Za-z_$][A-Za-z0-9_$]*(?=\\.[A-Za-z_$]))',
     '(?<ident>[A-Za-z_$][A-Za-z0-9_$]*)',
     '(?<op>=>|->|::|==|!=|<=|>=|&&|\\|\\||\\+\\+|--|[-+*/%=<>!&|^~?:.]+)',
     '(?<punct>[{}()\\[\\];,])',
@@ -189,6 +236,11 @@ export function highlightCode(code, lang) {
             out += `<span class="tok-string">${esc(raw)}</span>`;
         } else if (g.number) {
             out += `<span class="tok-number">${esc(raw)}</span>`;
+        } else if (g.fn) {
+            // 函数名/方法名：保留原空白（`func (` 这种带空格的形态）
+            const name = raw.trimEnd();
+            const tail = raw.slice(name.length);
+            out += `<span class="tok-fn">${esc(name)}</span>${esc(tail)}`;
         } else if (g.ident) {
             if (keywords.has(raw)) out += `<span class="tok-keyword">${esc(raw)}</span>`;
             else if (types.has(raw)) out += `<span class="tok-type">${esc(raw)}</span>`;
