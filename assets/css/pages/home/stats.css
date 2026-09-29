@@ -1,7 +1,9 @@
 /* ============================================================
-   pages/home/stats.css — 第 2 屏：GitHub 数据面板
-   只负责“区块骨架与挂载容器”，卡片内部样式由 assets/js/stats.js 注入
-   （该类名统一带 halo-stats- 前缀）
+   pages/home/stats.css — 第 2 屏：GitHub 数据面板（语言分布）
+
+   内容不再是第三方统计图服务返回的图片，而是 scripts/build-lang-chart.mjs
+   在构建时用 GitHub 官方 API 生成、内联进 index.html 的等距「方块城市」SVG。
+   所以这里只负责区块骨架与城市本身的排版。
    ============================================================ */
 
 .stats {
@@ -9,22 +11,17 @@
     background: #ffffff;
 }
 
-/* 两个面板：语言维度居中收窄，活跃维度稍宽 */
+/* 容器：城市居中收窄 */
 .stats-mount {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 22px;
-    min-height: 160px;
+    min-height: 0;
 }
 
 .stats-mount--lang {
-    max-width: 560px;
-    margin: 0 auto;
-}
-
-.stats-mount--flat {
-    max-width: 940px;
+    max-width: 620px;
     margin: 0 auto;
 }
 
@@ -51,67 +48,68 @@
     color: var(--color-primary);
 }
 
-/* 统计图服务在窄屏下会返回更矮的卡片，容器自适应 */
-@media (min-width: 900px) {
-    .stats-mount--flat {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-    }
+/* ---------- 语言分布「方块城市」 ---------- */
+
+.lang-city-wrap {
+    width: 100%;
 }
 
-/* ---------- 让图表脱离卡片框 ----------
-   assets/js/stats.js 会把每张统计图包进 .halo-stats-card，并自带白底、描边、圆角与
-   3D 倾角（那些样式是它注入的，本文件加载更晚，同优先级下按顺序覆盖）。
-   这里把「卡片外壳」抵消掉，让图表本身当作独立板块直接铺在区块里，
-   只保留内部留白与降级提示的排版。 */
-.stats-mount .halo-stats-card {
-    background: none;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
+.lang-city {
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
-/* 去掉立体倾角与悬停位移，图表保持平面 */
-.stats-mount .halo-stats-tilt > .halo-stats-card,
-.stats-mount .halo-stats-tilt > .halo-stats-card:hover,
-.stats-mount .halo-stats-tilt > .halo-stats-card:focus-within {
-    transform: none;
-    box-shadow: none;
-}
-
-/* 卡片头部标题/说明保持为普通文字，不再像卡片标题 */
-.stats-mount .halo-stats-card-head {
-    padding: 0 0 14px;
-    text-align: center;
-}
-
-.stats-mount .halo-stats-card-body {
+/* 图例：等距斜面上的字很难读，数值统一放在图外 */
+.lang-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 9px 20px;
+    margin: 20px 0 0;
     padding: 0;
+    list-style: none;
 }
 
-/* 统计图服务不可达时的降级块：
-   收紧内边距、文字居中，并去掉与外部标题重复的卡片标题，避免又变成一个大方框。
-   判定用 stats.js 写的 data-halo-stats-state="failed"，比 :has() 更严谨
-   （:has() 在降级块尚未被移除的时刻会误判，例如重试成功的那一帧）。 */
-.stats-mount .halo-stats-card[data-halo-stats-state="failed"] {
+.lang-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-light);
+    font-size: 13px;
+    color: var(--color-ink);
+}
+
+.lang-legend-swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    flex: 0 0 auto;
+}
+
+.lang-legend-share {
+    color: var(--color-muted);
+}
+
+/* 数据来源与生成时间：字号更小、颜色更淡，不抢主体 */
+.lang-city-note {
+    margin: 16px 0 0;
+    font-family: var(--font-light);
+    font-size: 12px;
+    text-align: center;
+    color: var(--color-muted);
+}
+
+/* 没有可用数据时的中性占位 */
+.lang-city-empty {
+    margin: 0;
+    padding: 36px 20px;
     border: 1px dashed var(--color-border);
     border-radius: var(--radius-md);
-    padding: 20px 22px;
+    font-family: var(--font-light);
+    font-size: 13px;
     text-align: center;
-}
-
-.stats-mount .halo-stats-card[data-halo-stats-state="failed"] .halo-stats-card-title {
-    display: none;
-}
-
-.stats-mount .halo-stats-card[data-halo-stats-state="failed"] .halo-stats-card-head {
-    padding-bottom: 4px;
-}
-
-.stats-mount .halo-stats-card[data-halo-stats-state="failed"] .halo-stats-card-body {
-    min-height: 0;
+    color: var(--color-muted);
 }
 
 /* ---------- 小屏 ---------- */
@@ -124,9 +122,12 @@
         margin-top: 48px;
     }
 
-    .stats-mount--lang,
-    .stats-mount--flat {
+    .stats-mount--lang {
         max-width: 100%;
     }
-}
 
+    .lang-legend {
+        gap: 8px 14px;
+        font-size: 12px;
+    }
+}
