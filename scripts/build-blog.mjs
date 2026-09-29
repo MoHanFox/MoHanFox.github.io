@@ -43,6 +43,26 @@ const GISCUS_STYLE_TAG =
   '    <link rel="stylesheet" href="../../assets/css/pages/blog/giscus.css">';
 /** 文章页右侧章节导航：少于这个标题数就不显示（一两个标题没必要占一栏） */
 const TOC_MIN_HEADINGS = 2;
+/**
+ * 小说标签：命中这些标签的文章改用「小说模式」渲染 —— 即**换行即分段**。
+ * 标准 Markdown 会把单个换行当软换行（并进同一个 <p>），而小说靠换行分段，
+ * 否则整章对话会糊成一大段。
+ *
+ * 同时接受英文 `novel` 与中文标签：作者实际用的是 `小说/什纳` 这种分类形式，
+ * 所以这里按「标签等于 novel」或「标签以 小说 开头」来判断。
+ */
+const NOVEL_TAGS = ['novel', '小说'];
+
+/** 该 issue 是否按小说渲染 */
+export function isNovel(issue) {
+  const tags = Array.isArray(issue && issue.tags) ? issue.tags : [];
+  return tags.some((raw) => {
+    const tag = String(raw || '').trim().toLowerCase();
+    if (!tag) return false;
+    // `小说` 或 `小说/什纳` 这类带层级的分类都算
+    return NOVEL_TAGS.some((needle) => tag === needle || tag.startsWith(`${needle}/`));
+  });
+}
 
 /* ------------------------------------------------------------------ */
 /* 参数与工具                                                          */
@@ -557,9 +577,12 @@ export async function buildPages(payload, repo, giscusConfig = null) {
     const number = Number(issue.number) || 0;
     const title = String(issue.title || `（无标题 issue #${number}）`);
     const body = typeof issue.body === 'string' ? issue.body : '';
+    // 小说标签的文章改用「换行即分段」渲染
+    const novel = isNovel(issue);
+    if (novel) console.log(`[build-blog]   #${number} 命中小说标签 → 换行即分段`);
     // 传入数组即开启标题收集；渲染结束时 marked 会把它填满
     const headingIds = [];
-    const content = renderMarkdown(body, { headingIds });
+    const content = renderMarkdown(body, { headingIds, novel });
     const excerpt = toPlainText(issue.excerpt) || toMetaText(toPlainText(body));
     const toc = renderToc(headingIds);
 

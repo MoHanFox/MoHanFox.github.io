@@ -365,19 +365,80 @@ export function toPlainText(md) {
 }
 
 /**
+ * 小说模式：把「单个换行」也当成段落分隔。
+ *
+ * 标准 Markdown 把单换行当软换行（渲染成一个空格），小说却靠换行分段 ——
+ * 一整章对话会被并进同一个 <p>，读起来全糊在一起。
+ *
+ * 做法是在解析**之前**重写正文：把段落内的每一行拆成独立段落。
+ * 三条刻意保留的规则（否则会破坏其它语法）：
+ *   · 围栏代码块（``` / ~~~）内部原样保留；
+ *   · 已有块级语法含义的行（标题、列表、引用、表格、分隔线、HTML）不拆；
+ *   · 行尾的两个空格（Markdown 的硬换行）去掉，避免和分段重复。
+ */
+export function expandNovelParagraphs(md) {
+  const lines = coerceMarkdown(md).replace(/\r\n?/g, '\n').split('\n');
+  const out = [];
+  let fence = null; // 记住当前围栏（``` 或 ~~~）及其长度
+
+  for (const line of lines) {
+    const fenceMatch = /^\s{0,3}(`{3,}|~{3,})/.exec(line);
+    if (fenceMatch) {
+      const marker = fenceMatch[1][0];
+      if (fence === null) fence = marker;
+      else if (marker === fence) fence = null;
+      out.push(line);
+      continue;
+    }
+
+    // 围栏内部：原样
+    if (fence !== null) {
+      out.push(line);
+      continue;
+    }
+
+    // 空行：段落分隔，原样保留
+    if (/^\s*$/.test(line)) {
+      out.push('');
+      continue;
+    }
+
+    // 已有块级含义的行：不拆
+    if (/^\s{0,3}(#{1,6}\s|>|\||[-*+]\s|\d+[.)]\s|_{3,}|\*{3,}|-{3,}|<)/.test(line)) {
+      out.push(line);
+      continue;
+    }
+
+    // 段内普通文本行 -> 独立段落；行尾两个空格（硬换行）去掉，避免重复
+    out.push(line.replace(/ {2,}$/, ''));
+    out.push('');
+  }
+
+  return out.join('\n');
+}
+
+/**
  * Markdown -> HTML。
  *
  * @param {unknown} md 原始 Markdown。undefined / null / 非字符串 / 空串都合法。
  * @param {{
  *   transform?: (html: string) => string,
- *   headingIds?: Array<{ id: string, text: string, level: number }>
+ *   headingIds?: Array<{ id: string, text: string, level: number }>,
+ *   novel?: boolean
  * }} [options]
  *        - transform：可选后处理钩子，在默认渲染完成后调用，用它的返回值替换结果。
  *        - headingIds：传入数组时，渲染过程中把每个标题的 { id, text, level }
  *          依次推进去，供调用方生成目录（id 与页面上的锚点完全一致）。
+ *        - novel：true 时启用小说模式（换行即分段），默认 false 走标准 Markdown。
  * @returns {string} HTML 字符串；任何情况下都不抛异常。
  */
 export function renderMarkdown(md, options) {
+  const isNovel = Boolean(options && options.novel);
+  const source = isNovel ? expandNovelParagraphs(md) : md;
+  return renderMarkdownCore(source, options);
+}
+
+function renderMarkdownCore(md, options) {
   let html = '';
 
   // 标题收集：先用局部数组，解析结束后才写回调用方传入的数组，
