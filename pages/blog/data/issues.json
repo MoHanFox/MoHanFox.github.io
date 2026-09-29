@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T18:03:15.117Z",
+  "generatedAt": "2026-09-29T18:05:45.607Z",
   "repo": "MoHanFox/MoHanFox.github.io",
   "count": 2,
   "issues": [
@@ -10,7 +10,7 @@
       "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/8",
       "state": "open",
       "createdAt": "2026-09-29T15:09:50Z",
-      "updatedAt": "2026-09-29T17:36:19Z",
+      "updatedAt": "2026-09-29T18:05:26Z",
       "labels": [
         "blog",
         "Go/精选"
@@ -18,7 +18,7 @@
       "tags": [
         "Go/精选"
       ],
-      "body": "使用的Go模块: \n- Gin:  Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。\n- Gorm:  GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。\n    > 本章节使用 MySQL 数据库作演示\n- Viper:  Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，包括JSON、TOML、YAML、HCL、envfile和Java属性文件。\n- Go: [Go](https://go.dev/) [1.25](https://go.dev/doc/devel/release#go1.25) 或更高版本\n\n# 项目准备\n1. 创造你的Go目录\n2. 为你的项目装载以上模块\n3. 本项目以**自定义的Go控制台模拟前端** + **Go后端**为示例进行\n\n```go.mod\nrequire (\n\tgithub.com/gin-contrib/cors v1.7.9          //官方的Cors，本章节也会提供定制Cors\n\tgithub.com/gin-gonic/gin v1.12.0\n\tgithub.com/spf13/viper v1.21.0\n\tgorm.io/driver/mysql v1.6.0\n\tgorm.io/gorm v1.31.2\n)\n```\n3. 开始编写你的简易后端\n\n# 代码准备\n1. 创建你的第一个 Gin 应用\n```mian.go\npackage main\n\nimport \"github.com/gin-gonic/gin\"\n\nfunc main() {\n  router := gin.Default()\n  router.GET(\"/ping\", func(c *gin.Context) {\n    c.JSON(200, gin.H{\n      \"message\": \"pong\",\n    })\n  })\n  router.Run() // listens on 0.0.0.0:8080 by default\n}\n```\n使用以下命令启动服务器：\n```\ngo run main.go\n```\n在浏览器中访问 http://localhost:8080/ping\n你应该会看到：\n```\n{\"message\":\"pong\"}\n```\n恭喜你，你可以把你的gin应用做大做强了！\n\n# 拓展你的接口与Rest规则\n## Rest规则:\naa\n## 拓展你的接口:\nbb\n\n# Cors\naa\n\n咕咕咕，之后再写",
+      "body": "使用的Go模块: \n- Gin:  Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。\n- Gorm:  GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。\n    > 本章节使用 MySQL 数据库作演示\n- Viper:  Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，包括JSON、TOML、YAML、HCL、envfile和Java属性文件。\n- Go: [Go](https://go.dev/) [1.25](https://go.dev/doc/devel/release#go1.25) 或更高版本\n\n# 项目准备\n1. 创造你的Go目录\n2. 为你的项目装载以上模块\n3. 本项目以**自定义的Go控制台模拟前端** + **Go后端**为示例进行\n\n```go.mod\nrequire (\n\tgithub.com/gin-contrib/cors v1.7.9          //官方的Cors，本章节也会提供定制Cors\n\tgithub.com/gin-gonic/gin v1.12.0\n\tgithub.com/spf13/viper v1.21.0\n\tgorm.io/driver/mysql v1.6.0\n\tgorm.io/gorm v1.31.2\n)\n```\n3. 开始编写你的简易后端\n\n# 代码准备\n1. 创建你的第一个 Gin 应用\n```mian.go\npackage main\n\nimport \"github.com/gin-gonic/gin\"\n\nfunc main() {\n  router := gin.Default()\n  router.GET(\"/ping\", func(c *gin.Context) {\n    c.JSON(200, gin.H{\n      \"message\": \"pong\",\n    })\n  })\n  router.Run() // listens on 0.0.0.0:8080 by default\n}\n```\n使用以下命令启动服务器：\n```\ngo run main.go\n```\n在浏览器中访问 http://localhost:8080/ping\n你应该会看到：\n```\n{\"message\":\"pong\"}\n```\n恭喜你，你可以把你的gin应用做大做强了！\n\n# 拓展你的接口与Rest规则\n## Rest规则:\n## 拓展你的接口:\n# Cors\n\n咕咕咕，之后再写",
       "excerpt": "使用的Go模块: - Gin: Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。 - Gorm: GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。 > 本章节使用 MySQL 数据库作演示 - Viper: Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，"
     },
     {
