@@ -95,7 +95,13 @@ const KEYWORDS = {
           join inner left right outer on group by having order limit offset as and or not null
           primary key foreign references distinct count sum avg min max`,
     yaml: `true false null yes no on off`,
-    json: `true false null`
+    json: `true false null`,
+
+    // go.mod 是**独立语法**，不能按 .go 处理：
+    // 它是指令式的（module / require / replace ...），正文里根本不会出现 func/if，
+    // 而 require 这些指令词也不在 Go 关键词表里。版本号（v1.7.9）另有专门规则。
+    gomod: `module go toolchain require replace exclude retract use
+            indirect incompatible`
 };
 
 /** Go 的内建类型不是关键字，但值得单独染色 */
@@ -133,7 +139,10 @@ Object.keys(TYPES).forEach((lang) => { TYPE_SETS[lang] = toSet(TYPES[lang]); });
 
 /** 源码文件扩展名 → 语言标识（用于「围栏写成文件名」的兜底） */
 const EXT_TO_LANG = {
-    go: 'go', mod: 'go', sum: 'go',
+    go: 'go',
+    // go.mod / go.sum 是各自的格式，不要并到 go
+    mod: 'gomod',
+    sum: 'gomod',
     java: 'java', kt: 'java',
     js: 'javascript', mjs: 'javascript', cjs: 'javascript',
     ts: 'typescript', tsx: 'typescript',
@@ -149,6 +158,13 @@ const EXT_TO_LANG = {
     css: 'css'
 };
 
+/** 语言别名 → 关键词表。注意 `go.mod` / `go.sum` 要单独映射，不能落到 go */
+const MODULE_FILE_LANG = {
+    'go.mod': 'gomod',
+    'go.sum': 'gomod',
+    'go.work': 'gomod'
+};
+
 /**
  * 归一化语言名。
  *
@@ -160,18 +176,24 @@ export function normalizeLang(lang) {
     const raw = String(lang || '').trim().toLowerCase();
     if (!raw) return '';
 
-    // 1) 本身就是已知标识 / 别名
+    // 1) 本身就是已知标识 / 别名（`go` / `golang` / `C#` ...）
     if (LANG_ALIAS[raw]) return LANG_ALIAS[raw];
     if (KEYWORD_SETS[raw] || TYPE_SETS[raw]) return raw;
 
-    // 2) 形态像文件名（`main.go` / `go.mod` / `a/b/c.java`）：按扩展名认
+    // 2) 模块文件优先：`go.mod` / `go.sum` / `go.work` 是**独立语法**。
+    //    这一步必须排在扩展名之前，否则 `go.mod` 会因为 `.go` 前缀被当成 Go 代码。
+    const base = raw.split('/').pop();
+    if (MODULE_FILE_LANG[base]) return MODULE_FILE_LANG[base];
+
+    // 3) 形态像文件名（`main.go` / `a/b/c.java`）：按扩展名认
     const fileMatch = /^[\w./+-]+\.([a-z0-9]+)$/.exec(raw);
     if (fileMatch) {
         const byExt = EXT_TO_LANG[fileMatch[1]];
         if (byExt) return byExt;
     }
 
-    // 3) 取首段（`mian.go` -> `mian`）看能否命中；命中不了就原样返回（上层按未知语言处理）
+    // 4) 取首段再试（`mian.go` -> `mian` 认不出来就作罢；
+    //    写成 `golang` 这类无扩展名的别名已在第 1 步处理）
     const head = raw.split(/[.\s/]/)[0];
     if (head && (LANG_ALIAS[head] || KEYWORD_SETS[head] || TYPE_SETS[head])) {
         return LANG_ALIAS[head] || head;
@@ -188,15 +210,24 @@ export function isSupported(lang) {
 
 /* 单次扫描用的组合正则。顺序很重要：
    1) 注释必须在运算符之前，否则 `//` 会被当成除号；
-   2) 标识符分支要尽力匹配「函数名/方法名」的形状后再回退到普通标识符，
-      否则 `fmt.Printf` 里的 Printf 拿不到函数名高亮。 */
+   2) 版本号要在数字之前，否则 `v1.7.9` 会被数字规则拆成 `v1` + `.7` + `.9`；
+   3) **关键词要先于「后跟括号」的函数名分支**，否则 go.mod 里的 `require (`
+      会被当成函数调用而上错颜色。 */
 const TOKEN_RE = new RegExp([
     '(?<comment>\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/|#[^\\n]*)',
     '(?<triple>"{{3}|\\\'{{3}})',
     '(?<string>"(?:\\\\.|[^"\\\\\\n])*"|\\\'(?:\\\\.|[^\\\'\\\\\\n])*\\\'|`(?:\\\\.|[^`\\\\])*`)',
-    '(?<number>\\b(?:0[xXbBoO][0-9a-fA-F_]+|\\d[\\d_]*(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)\\b)',
-    // 函数名 / 方法名：后面紧跟 `(`，或形如 `foo.bar`（前一段是命名空间）
-    '(?<fn>[A-Za-z_$][A-Za-z0-9_$]*\\s*(?=\\()|[A-Za-z_$][A-Za-z0-9_$]*(?=\\.[A-Za-z_$]))',
+    // 语义化版本：v1.7.9 / v1.2 / v2.0.0-rc.1 / 2.0.0 —— 整体着色，不拆碎
+    '(?<version>v\\d+(?:\\.\\d+)+(?:-[0-9A-Za-z.+-]+)?|\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.+-]+)?)',
+    // 数字：整数、小数、进制、科学计数法。小数的 `.` 后面必须是数字，
+    // 且不能再跟 `.<数字>`（否则会把版本号的后半截吃掉）
+    '(?<number>\\b(?:0[xXbBoO][0-9a-fA-F_]+|\\d[\\d_]*(?:\\.\\d+(?!\\.\\d))?(?:[eE][+-]?\\d+)?)\\b)',
+    // 语句关键词：优先判定，避免 `require (` 被当成函数名
+    '(?<kw>[A-Za-z_$][A-Za-z0-9_$]*)',
+    // 函数名：标识符后面紧跟 `(`。
+    // 刻意**不**把 `foo.bar` 里的 `foo` 也算进来 —— 那是包名/命名空间，
+    // 应保持代码块默认字色（`fmt.Printf` 的 fmt、`router.GET` 的 router）。
+    '(?<fn>[A-Za-z_$][A-Za-z0-9_$]*\\s*(?=\\())',
     '(?<ident>[A-Za-z_$][A-Za-z0-9_$]*)',
     '(?<op>=>|->|::|==|!=|<=|>=|&&|\\|\\||\\+\\+|--|[-+*/%=<>!&|^~?:.]+)',
     '(?<punct>[{}()\\[\\];,])',
@@ -223,6 +254,14 @@ export function highlightCode(code, lang) {
     TOKEN_RE.lastIndex = 0;
     let match;
 
+    // keywords / types 都可能为 null（例如 gomod 只配了指令词、没有类型表），
+    // 所以取词时必须判空 —— 否则会抛 TypeError，整页 Markdown 渲染失败。
+    const classify = (word) => {
+        if (keywords && keywords.has(word)) return 'tok-keyword';
+        if (types && types.has(word)) return 'tok-type';
+        return '';
+    };
+
     while ((match = TOKEN_RE.exec(source)) !== null) {
         const g = match.groups || {};
         const raw = match[0];
@@ -234,17 +273,34 @@ export function highlightCode(code, lang) {
             out += `<span class="tok-string">${esc(raw)}</span>`;
         } else if (g.string) {
             out += `<span class="tok-string">${esc(raw)}</span>`;
+        } else if (g.version) {
+            // 语义化版本号整体着色，不拆成 v1 / .7 / .9
+            out += `<span class="tok-version">${esc(raw)}</span>`;
         } else if (g.number) {
             out += `<span class="tok-number">${esc(raw)}</span>`;
+        } else if (g.kw) {
+            // kw 分支吃掉所有普通标识符，所以这里要按优先级自己分派：
+            //   1) 已知关键词/类型 → 关键词色（`require (` 里的 require 就走这条）
+            //   2) 后面紧跟 `(` → 函数名
+            //   3) 其余 → 原样（包名、变量名都属于这类，保持默认字色）
+            const kind = classify(raw);
+            if (kind) {
+                out += `<span class="${kind}">${esc(raw)}</span>`;
+            } else if (/^\s*\(/.test(source.slice(TOKEN_RE.lastIndex))) {
+                const name = raw.trimEnd();
+                const tail = raw.slice(name.length);
+                out += `<span class="tok-fn">${esc(name)}</span>${esc(tail)}`;
+            } else {
+                out += esc(raw);
+            }
         } else if (g.fn) {
-            // 函数名/方法名：保留原空白（`func (` 这种带空格的形态）
+            // 函数名：保留原空白（`func (` 这种带空格的形态）
             const name = raw.trimEnd();
             const tail = raw.slice(name.length);
             out += `<span class="tok-fn">${esc(name)}</span>${esc(tail)}`;
         } else if (g.ident) {
-            if (keywords.has(raw)) out += `<span class="tok-keyword">${esc(raw)}</span>`;
-            else if (types.has(raw)) out += `<span class="tok-type">${esc(raw)}</span>`;
-            else out += esc(raw);
+            const kind = classify(raw);
+            out += kind ? `<span class="${kind}">${esc(raw)}</span>` : esc(raw);
         } else {
             // 运算符、标点、空白、其它：原样输出（已转义）
             out += esc(raw);
