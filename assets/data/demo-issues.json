@@ -1,0 +1,121 @@
+{
+  "_readme": [
+    "本地 UI 检验用的演示数据（占位，不是真实文章）。",
+    "",
+    "用法：npm run preview:demo   然后访问 http://localhost:8000/pages/blog/",
+    "它会被当作 issues.json 直接喂给 build-blog.mjs，因此不需要 GitHub token、也不联网。",
+    "",
+    "这份数据刻意覆盖了各种边界，方便一眼看出样式问题：",
+    "  · 分类：三层嵌套（Go → 精选 → 并发）、多个顶层分类、完全无标签的文章",
+    "  · 标签数量：0 个 / 1 个 / 4 个（很多标签时的换行与胶囊间距）",
+    "  · 文章状态：open 与 closed（关闭态标记）",
+    "  · 标题：超长标题（看卡片换行与目录省略号）、全中文、中英混排",
+    "  · 正文：多级标题（章节导航）、代码块、表格、引用、任务列表、长段落",
+    "  · 摘要：空摘要（卡片不渲染摘要行）、超长摘要",
+    "  · 边界：标题缺失编号的文章、只有一级标题的文章（目录应隐藏）",
+    "",
+    "注意：assets/ 会整个部署到线上，所以这份夹具在站点上也能被访问到（内容无隐私，可接受）。",
+    "pages/blog/** 在 .gitignore 里，构建产物不入库。"
+  ],
+  "generatedAt": "2026-09-29T00:00:00Z",
+  "repo": "MoHanFox/MoHanFox.github.io",
+  "count": 8,
+  "issues": [
+    {
+      "number": 1,
+      "title": "Go 入门：变量、类型与流程控制",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/1",
+      "state": "open",
+      "createdAt": "2026-08-01T00:00:00Z",
+      "updatedAt": "2026-08-02T00:00:00Z",
+      "labels": ["blog", "Go"],
+      "tags": ["Go"],
+      "excerpt": "从零开始过一遍 Go 的基础语法：变量声明、基本类型、条件与循环。",
+      "body": "# 变量与类型\n\nGo 是静态类型语言，声明方式有几种写法。\n\n## 变量声明\n\n```go\nvar a int = 1\nb := 2\nvar c, d = 3, \"四\"\n```\n\n## 基本类型\n\n| 类型 | 说明 |\n| --- | --- |\n| int | 整数 |\n| float64 | 双精度浮点 |\n| string | 字符串 |\n| bool | 布尔 |\n\n# 流程控制\n\n## 条件与循环\n\nGo 只有 `for` 一种循环。\n\n```go\nfor i := 0; i < 3; i++ {\n    fmt.Println(i)\n}\n```\n\n> 注意：`if` 语句可以带一个初始化语句，作用域仅限该 `if`。\n\n## 小结\n\n- 没有隐式类型转换\n- 未使用的变量会编译报错\n"
+    },
+    {
+      "number": 2,
+      "title": "Go 精选：并发模式与 channel 实践",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/2",
+      "state": "open",
+      "createdAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-03T00:00:00Z",
+      "labels": ["blog", "Go/精选"],
+      "tags": ["Go/精选"],
+      "excerpt": "channel、select 与 context 的组合用法，以及常见的坑。",
+      "body": "# channel 基础\n\nchannel 是 goroutine 之间通信的通道。\n\n```go\nch := make(chan int, 1)\nch <- 1\nfmt.Println(<-ch)\n```\n\n# select 多路复用\n\n`select` 会随机选择一个就绪的分支。\n\n> 空 `select{}` 会永久阻塞，主 goroutine 里写它等于死锁。\n\n# context 取消\n\n用 `context.WithCancel` 传取消信号。\n\n- [x] 超时控制\n- [ ] 优雅退出\n"
+    },
+    {
+      "number": 3,
+      "title": "Go 精选/并发：把这篇文章的标题写得很长很长很长很长很长用来检查卡片换行与目录省略号的表现",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/3",
+      "state": "open",
+      "createdAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-12T00:00:00Z",
+      "labels": ["blog", "Go/精选/并发"],
+      "tags": ["Go/精选/并发"],
+      "excerpt": "",
+      "body": "# 只有一个一级标题\n\n这篇文章只有一级标题，所以右侧章节导航应当**完全不渲染**（少于 2 个标题）。\n\n这是验证「标题不足时隐藏目录」的用例。\n"
+    },
+    {
+      "number": 4,
+      "title": "Java 泛型：通配符与类型擦除",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/4",
+      "state": "open",
+      "createdAt": "2026-08-06T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
+      "labels": ["blog", "Java"],
+      "tags": ["Java"],
+      "excerpt": "`? extends` 与 `? super` 的区别，以及擦除带来的限制。",
+      "body": "# 通配符\n\n## extends 与 super\n\n- `? extends T`：只读\n- `? super T`：只写\n\n```java\nList<? extends Number> readOnly = new ArrayList<Integer>();\n```\n\n# 类型擦除\n\n泛型信息在运行时会被擦除。\n\n> 因此不能 `new T()`，也不能对泛型做 `instanceof`。\n"
+    },
+    {
+      "number": 5,
+      "title": "日常学习：这周踩过的坑",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/5",
+      "state": "open",
+      "createdAt": "2026-08-07T00:00:00Z",
+      "updatedAt": "2026-08-07T00:00:00Z",
+      "labels": ["blog", "日常学习"],
+      "tags": ["日常学习"],
+      "excerpt": "记录本周遇到的几个问题和解决过程。",
+      "body": "# 问题一\n\n某个命令在 CI 里能跑、本地不行，最后发现是行尾差异。\n\n# 问题二\n\n缓存导致改动没生效，清掉就好了。\n"
+    },
+    {
+      "number": 6,
+      "title": "标签很多的文章",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/6",
+      "state": "open",
+      "createdAt": "2026-08-08T00:00:00Z",
+      "updatedAt": "2026-08-08T00:00:00Z",
+      "labels": ["blog", "Go", "Java", "日常学习", "效率工具"],
+      "tags": ["Go", "Java", "日常学习", "效率工具"],
+      "excerpt": "四个标签同时存在，用来检查标签胶囊的换行与间距。",
+      "body": "# 多标签用例\n\n这篇文章带了四个标签，用于检查卡片上标签区的换行表现。\n"
+    },
+    {
+      "number": 7,
+      "title": "已关闭的文章",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/7",
+      "state": "closed",
+      "createdAt": "2026-08-09T00:00:00Z",
+      "updatedAt": "2026-08-09T00:00:00Z",
+      "labels": ["blog", "Java"],
+      "tags": ["Java"],
+      "excerpt": "state 为 closed 的文章，卡片与文章页应显示「已关闭」标记。",
+      "body": "# 关闭态用例\n\n这篇的 state 是 closed，用于检查「已关闭」标记的样式。\n"
+    },
+    {
+      "number": 8,
+      "title": "没有任何标签的文章",
+      "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/8",
+      "state": "open",
+      "createdAt": "2026-08-10T00:00:00Z",
+      "updatedAt": "2026-08-10T00:00:00Z",
+      "labels": ["blog"],
+      "tags": [],
+      "excerpt": "tags 为空：卡片上不应出现标签区，侧栏分类也不应包含它（只出现在「全部」里）。",
+      "body": "# 无标签用例\n\n这篇文章没有任何分类标签，只应出现在「全部」下。\n\n这是一段较长的正文，用来检查行高与阅读宽度是否合适。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。重复内容用于撑开高度。\n"
+    }
+  ]
+}

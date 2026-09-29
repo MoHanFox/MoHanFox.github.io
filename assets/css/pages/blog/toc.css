@@ -107,44 +107,51 @@
     font-size: 12px;
 }
 
-/* ---------- 宽屏：固定在正文右侧、垂直居中 ----------
-   断点取 1500px：正文容器宽 860px 且水平居中，窗口窄于这个值时
-   右侧剩余空间不足以放下 210px 的目录，会压到正文。 */
-@media (min-width: 1500px) {
+/* ---------- 宽屏：固定在屏幕右中，永远可见 ----------
+   占的是页面右侧的空白区：正文只要让出「栏宽 + 间距」即可，所以 1220px 就能放下
+   （正文容器 860px + 栏 200px + 两侧间距）。 */
+@media (min-width: 1220px) {
     .blog-toc {
         display: block;
         position: fixed;
         top: 50%;
         right: 30px;
-        width: 210px;
-        max-height: 66vh;
+        width: 200px;
+        /* 目录比视口高时自身滚动，避免溢出被裁掉 */
+        max-height: 68vh;
         overflow-y: auto;
         transform: translateY(-50%);
         z-index: 10;
     }
+
+    /* 给正文让出右侧固定栏，保证正文仍在视口内水平居中 */
+    body.page-blog .blog-wrap {
+        padding-right: 240px;
+    }
+
+    /* 固定在右中时贯穿竖线会拉满整栏、显得突兀；刻度本身已能表达层级 */
+    .blog-toc-nav::before {
+        display: none;
+    }
 }
 
-/* ---------- 中等宽度：贴在正文上方 ----------
-   用与 .blog-wrap 相同的内边距与最大宽度，保证目录卡和正文左右对齐。 */
-@media (min-width: 769px) and (max-width: 1499px) {
+/* ---------- 较窄：无法固定时改为贴在正文上方（随页面滚动） ----------
+   用与 .blog-wrap 相同的内边距与最大宽度，保证和正文左右对齐。 */
+@media (max-width: 1219px) {
     .blog-toc {
         display: block;
         box-sizing: border-box;
         width: 100%;
         max-width: 860px;
-        margin: 56px auto 0;
-        padding: 0 28px;
+        margin: 0 auto;
+        padding: 76px 28px 0;
     }
 
-    .blog-toc-nav {
-        max-height: none;
+    /* 贴在上方时竖线会显得很长，去掉它，只保留刻度 */
+    .blog-toc-nav::before {
+        display: none;
     }
 
-    .blog-toc-title {
-        padding-left: 0;
-    }
-
-    /* 贴在正文上方时，多层级的缩进收敛一些 */
     .blog-toc-item--3 .blog-toc-link {
         padding-left: 26px;
     }
@@ -153,5 +160,10 @@
     .blog-toc-item--5 .blog-toc-link,
     .blog-toc-item--6 .blog-toc-link {
         padding-left: 34px;
+    }
+
+    /* 上方已经被目录占掉内边距，正文就不必再留顶部空间 */
+    .blog-wrap {
+        padding-top: 26px;
     }
 }
