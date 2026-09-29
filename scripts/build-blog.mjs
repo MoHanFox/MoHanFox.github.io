@@ -29,6 +29,7 @@ import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
 import { renderMarkdown, escapeHtml, toPlainText, markedVersion } from './markdown.mjs';
+import { NOVELMODE_TAGS, POST_LABEL } from './build-issues.mjs';
 
 const DEFAULT_DATA = 'pages/blog/data/issues.json';
 const DEFAULT_OUT_DIR = 'pages/blog';
@@ -44,24 +45,37 @@ const GISCUS_STYLE_TAG =
 /** 文章页右侧章节导航：少于这个标题数就不显示（一两个标题没必要占一栏） */
 const TOC_MIN_HEADINGS = 2;
 /**
- * 小说标签：命中这些标签的文章改用「小说模式」渲染 —— 即**换行即分段**。
- * 标准 Markdown 会把单个换行当软换行（并进同一个 <p>），而小说靠换行分段，
- * 否则整章对话会糊成一大段。
+ * 小说模式标签：命中后文章按「换行即分段」渲染（标准 Markdown 会把单换行
+ * 当软换行并进同一个 <p>，小说靠换行分段，否则整章对话会糊成一大段）。
  *
- * 同时接受英文 `novel` 与中文标签：作者实际用的是 `小说/什纳` 这种分类形式，
- * 所以这里按「标签等于 novel」或「标签以 小说 开头」来判断。
+ * 这些标签是**控制类标签**，与 `blog` 同性质：
+ *   · 不显示成文章标签
+ *   · 不生成分类导航目录项
+ * 由 displayTags() 统一过滤，见下。
  */
-const NOVEL_TAGS = ['novel', '小说'];
+const NOVEL_TAGS = NOVELMODE_TAGS;
 
-/** 该 issue 是否按小说渲染 */
+/** 该 issue 是否按小说渲染（大小写不敏感） */
 export function isNovel(issue) {
   const tags = Array.isArray(issue && issue.tags) ? issue.tags : [];
   return tags.some((raw) => {
     const tag = String(raw || '').trim().toLowerCase();
-    if (!tag) return false;
-    // `小说` 或 `小说/什纳` 这类带层级的分类都算
-    return NOVEL_TAGS.some((needle) => tag === needle || tag.startsWith(`${needle}/`));
+    return NOVEL_TAGS.some((needle) => tag === needle);
   });
+}
+
+/**
+ * 过滤掉「控制类标签」——即只用于驱动构建行为、不该展示给读者的标签。
+ * 目前是 `blog`（发文标记）与小说模式标签。
+ *
+ * 注意：过滤只发生在这里（展示 / 分类 / 搜索），issues.json 里保留原始标签，
+ * 这样数据可追溯，改规则也不用重新抓取。
+ */
+const CONTROL_TAGS = new Set([POST_LABEL, ...NOVEL_TAGS].map((t) => String(t).toLowerCase()));
+
+export function displayTags(tags) {
+  const list = Array.isArray(tags) ? tags : [];
+  return list.filter((raw) => !CONTROL_TAGS.has(String(raw || '').trim().toLowerCase()));
 }
 
 /* ------------------------------------------------------------------ */
@@ -360,7 +374,7 @@ function renderCard(issue, categories) {
   const excerpt = toPlainText(issue.excerpt);
   const closed = String(issue.state).toLowerCase() === 'closed';
   const cats = Array.isArray(categories) ? categories : [];
-  const searchText = [title, excerpt].concat(Array.isArray(issue.tags) ? issue.tags : [])
+  const searchText = [title, excerpt].concat(displayTags(issue.tags))
     .join(' ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -382,7 +396,7 @@ function renderCard(issue, categories) {
 
   if (excerpt) lines.push(`<p class="blog-card-excerpt">${escapeHtml(excerpt)}</p>`);
 
-  const tags = renderTags(issue.tags);
+  const tags = renderTags(displayTags(issue.tags));
   if (tags) lines.push(tags);
 
   return lines.filter((line) => line !== '').map((line) => `                ${line}`).join('\n');
@@ -397,7 +411,8 @@ function renderCard(issue, categories) {
  * 返回该文章所属的全部路径（含每一级的祖先，便于父级计数与筛选）。
  */
 export function categoryPaths(tags) {
-  const list = Array.isArray(tags) ? tags : [];
+  // 控制类标签（blog / 小说模式）不参与分类，否则侧栏会多出一个不该有的分类项
+  const list = displayTags(tags);
   const seen = new Set();
   const out = [];
 
@@ -598,7 +613,7 @@ export async function buildPages(payload, repo, giscusConfig = null) {
       STATE: String(issue.state).toLowerCase() === 'closed'
         ? '<span class="blog-tag blog-tag--closed">已关闭</span>'
         : '',
-      TAGS: renderTags(issue.tags),
+      TAGS: renderTags(displayTags(issue.tags)),
       CONTENT: content,
       ISSUE_URL: escapeHtml(String(issue.url || (slug ? `https://github.com/${slug}/issues/${number}` : '#'))),
       TOC: toc.html,

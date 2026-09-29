@@ -39,6 +39,12 @@ import { pathToFileURL } from 'node:url';
 export const POST_LABEL = 'blog';
 /** 带这个 label 的 issue 一律不发布。 */
 export const DRAFT_LABEL = 'draft';
+/**
+ * 小说模式标签：命中后文章按「换行即分段」的小说排版渲染。
+ * 它属于**控制类标签**，和 `blog` 一样只控制构建行为 ——
+ * 因此不会显示成文章标签，也不会生成分类目录项（由 build-blog 统一过滤）。
+ */
+export const NOVELMODE_TAGS = ['novel render'];
 /** 没有 <!--more--> 标记时，摘录取正文的前 N 个字符。 */
 export const EXCERPT_LIMIT = 200;
 /** REST 分页大小。 */
