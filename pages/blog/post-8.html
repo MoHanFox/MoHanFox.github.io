@@ -26,8 +26,8 @@
         <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E9%A1%B9%E7%9B%AE%E5%87%86%E5%A4%87" title="项目准备" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">项目准备</span></a></li>
         <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E4%BB%A3%E7%A0%81%E5%87%86%E5%A4%87" title="代码准备" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">代码准备</span></a></li>
         <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E6%8B%93%E5%B1%95%E4%BD%A0%E7%9A%84%E6%8E%A5%E5%8F%A3%E4%B8%8ERest%E8%A7%84%E5%88%99" title="拓展你的接口与Rest规则" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">拓展你的接口与Rest规则</span></a></li>
-        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#Rest%E8%A7%84%E5%88%99" title="Rest规则:" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">Rest规则:</span></a></li>
-        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E6%8B%93%E5%B1%95%E4%BD%A0%E7%9A%84%E6%8E%A5%E5%8F%A3" title="拓展你的接口:" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">拓展你的接口:</span></a></li>
+        <li class="blog-toc-item blog-toc-item--3"><a class="blog-toc-link" href="#Rest%E8%A7%84%E5%88%99" title="Rest规则:" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">Rest规则:</span></a></li>
+        <li class="blog-toc-item blog-toc-item--3"><a class="blog-toc-link" href="#%E6%8B%93%E5%B1%95%E4%BD%A0%E7%9A%84%E6%8E%A5%E5%8F%A3" title="拓展你的接口:" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">拓展你的接口:</span></a></li>
         <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#Cors" title="Cors" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">Cors</span></a></li>
             </ul>
         </nav>
@@ -71,8 +71,7 @@
 	github.com/spf13/viper v1.21.0
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.2
-)
-</code></pre>
+)</code></pre>
 <ol start="3">
 <li>开始编写你的简易后端</li>
 </ol>
@@ -93,15 +92,12 @@ func main() {
     })
   })
   router.Run() // listens on 0.0.0.0:8080 by default
-}
-</code></pre>
+}</code></pre>
 <p>使用以下命令启动服务器：</p>
-<pre><code>go run main.go
-</code></pre>
+<pre><code>go run main.go</code></pre>
 <p>在浏览器中访问 <a href="http://localhost:8080/ping" target="_blank" rel="noopener noreferrer">http://localhost:8080/ping</a>
 你应该会看到：</p>
-<pre><code>{&quot;message&quot;:&quot;pong&quot;}
-</code></pre>
+<pre><code>{&quot;message&quot;:&quot;pong&quot;}</code></pre>
 <p>恭喜你，你可以把你的gin应用做大做强了！</p>
 <h1 id="拓展你的接口与Rest规则">拓展你的接口与Rest规则
 </h1>
