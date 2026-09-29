@@ -7,7 +7,10 @@
   "scripts": {
     "build:issues": "node scripts/build-issues.mjs",
     "build:blog": "node scripts/build-blog.mjs",
-    "build": "node scripts/build-issues.mjs && node scripts/build-blog.mjs",
+    "build:lang": "node scripts/build-lang-chart.mjs",
+    "build:activity": "node scripts/build-activity-card.mjs",
+    "build:home": "node scripts/build-home.mjs",
+    "build": "node scripts/build-issues.mjs && node scripts/build-blog.mjs && node scripts/build-lang-chart.mjs && node scripts/build-activity-card.mjs && node scripts/build-home.mjs",
     "preview:blog": "node scripts/build-blog.mjs --allow-missing-data",
     "preview:demo": "node scripts/build-blog.mjs --data assets/data/demo-issues.json",
     "preview": "npm run preview:blog && python -m http.server 8000",

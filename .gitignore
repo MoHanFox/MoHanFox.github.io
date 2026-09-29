@@ -25,3 +25,8 @@ node_modules/
 pages/blog/index.html
 pages/blog/post-*.html
 pages/blog/data/
+
+# ---- 首页语言分布（注意：这个产物**故意提交**，不要加进忽略列表） ----
+# assets/data/lang-chart.html 是构建时生成的 SVG 片段，但它同时承担兜底作用：
+# 万一 CI 里查 GitHub API 那一步失败，注入时仍能拿到仓库里这一版可用片段，
+# 首页不至于缺掉整个数据面板。见 scripts/build-lang-chart.mjs。

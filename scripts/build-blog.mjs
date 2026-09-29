@@ -283,6 +283,34 @@ function renderTags(tags) {
 /** 文章正文写进 data-content 时保留的最大字符数（搜索结果用，截断只为控制页面体积） */
 const SEARCH_CONTENT_LIMIT = 3000;
 
+/** 卡片与文章页共用：作者 - 日期。作者名做成 GitHub 链接（若具备条件），二者之间补一个分隔符。 */
+function renderByline(issue) {
+  const author = typeof issue.author === 'string' ? issue.author.trim() : '';
+  const date = formatDate(issue.createdAt || issue.updatedAt);
+  const parts = [];
+
+  if (author) {
+    const safeAuthor = escapeHtml(author);
+    // 只有看起来是合法 GitHub 用户名时才做成外链，避免把奇怪的值拼进 URL
+    const linked = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/.test(author)
+      ? `<a class="blog-byline-author" href="https://github.com/${encodeURIComponent(author)}"` +
+        ` target="_blank" rel="noopener noreferrer">${safeAuthor}</a>`
+      : `<span class="blog-byline-author">${safeAuthor}</span>`;
+    parts.push(linked);
+  }
+  if (author && date) parts.push('<span class="blog-byline-sep" aria-hidden="true">-</span>');
+  if (date) parts.push(`<time class="blog-byline-date" datetime="${escapeHtml(isoDate(issue.createdAt || issue.updatedAt))}">${date}</time>`);
+
+  return parts.join('');
+}
+
+/** 取出 ISO 日期（YYYY-MM-DD）供 <time datetime> 用；解析失败返回空串 */
+function isoDate(value) {
+  const ts = Date.parse(value);
+  if (!Number.isFinite(ts)) return '';
+  return new Date(ts).toISOString().slice(0, 10);
+}
+
 /**
  * 列表页的一张文章卡。
  * data-cats    分类路径（空格分隔），侧栏据此筛选；
@@ -295,7 +323,6 @@ function renderCard(issue, categories) {
   const title = String(issue.title || `（无标题 issue #${number}）`);
   // 摘要可能来自 build-issues（已清理），也可能是手写/旧数据里的原始 Markdown，统一去标记
   const excerpt = toPlainText(issue.excerpt);
-  const date = formatDate(issue.createdAt || issue.updatedAt);
   const closed = String(issue.state).toLowerCase() === 'closed';
   const cats = Array.isArray(categories) ? categories : [];
   const searchText = [title, excerpt].concat(Array.isArray(issue.tags) ? issue.tags : [])
@@ -312,7 +339,7 @@ function renderCard(issue, categories) {
     ` data-number="${number}">`,
     `<h2 class="blog-card-title"><a href="./${POST_FILE_PREFIX}${number}.html">${escapeHtml(title)}</a></h2>`,
     '<p class="blog-card-meta">',
-    date ? `<span>${date}</span>` : '',
+    renderByline(issue),
     `<span>#${number}</span>`,
     closed ? '<span class="blog-tag blog-tag--closed">已关闭</span>' : '',
     '</p>'
@@ -526,6 +553,8 @@ export async function buildPages(payload, repo, giscusConfig = null) {
       PAGE_DESCRIPTION: escapeHtml(toMetaText(excerpt)),
       NUMBER: String(number),
       TITLE: escapeHtml(title),
+      // 作者与日期合并成一个 byline（作者 - 日期），模板里不再单独使用 DATE
+      AUTHOR: renderByline(issue),
       DATE: formatDate(issue.createdAt || issue.updatedAt),
       UPDATED: renderUpdatedHint(issue),
       STATE: String(issue.state).toLowerCase() === 'closed'

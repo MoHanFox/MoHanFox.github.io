@@ -1,0 +1,10 @@
+# Issue 模板选择器
+# 这两个模板已经自动带上对应的标签（blog-post 会带 blog），所以不需要提供额外的标签选项。
+blank_issues_enabled: true
+contact_links:
+  - name: 博客站点
+    url: https://mohanfox.github.io/pages/blog/
+    about: 查看已发布的文章
+  - name: Discussions
+    url: https://github.com/MoHanFox/MoHanFox.github.io/discussions
+    about: 文章下方的评论就存在这里

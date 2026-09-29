@@ -4,7 +4,7 @@
 
 - **主页**：首屏打字机 Welcome → GitHub 数据面板 → JSON 驱动的简历树 → 页脚小猫
 - **博客**：文章来自本仓库的 **GitHub Issues**，由 GitHub Actions 自动构建成静态页面并发布
-
+- **协议**：请你遵守开源协议
 ---
 
 ## 一、目录结构
@@ -27,7 +27,7 @@ MoHanFox.github.io/
 │   │       ├── home/
 │   │       │   ├── base.css            区块节奏、标题组、滚动入场动画
 │   │       │   ├── hero.css            首屏：满屏背景 + 打字机标题
-│   │       │   ├── stats.css           第 2 屏骨架（卡片样式在 stats.js 内）
+│   │       │   ├── stats.css           第 2 屏骨架 + 方块城市与图例样式
 │   │       │   ├── resume.css          第 3 屏简历树
 │   │       │   └── footer.css          第 4 屏页脚小猫
 │   │       └── blog/
@@ -37,12 +37,14 @@ MoHanFox.github.io/
 │   │           └── giscus.css          评论区样式（未启用评论时不加载）
 │   ├── data/
 │   │   ├── resume.json                 ★ 简历树数据源，改这个文件即可更新简历
-│   │   └── demo-issues.json            ★ 本地 UI 检验用的演示数据（假文章，见第五节）
+│   │   ├── demo-issues.json            ★ 本地 UI 检验用的演示数据（假文章，见第五节）
+│   │   ├── lang-chart.html             语言分布 SVG 片段（构建生成，提交以作失败兜底）
+│   │   ├── activity-card.html          账号活跃 SVG 片段（同上）
+│   │   └── lang-chart.json             语言字节数原始数据（构建生成，便于排查）
 │   ├── js/
 │   │   ├── navbar.js                   通用导航栏（自动推导资源前缀 + 当前页高亮）
 │   │   ├── hero.js                     首屏打字机 + 滚动入场
 │   │   ├── resume.js                   读取 resume.json 并渲染简历树
-│   │   ├── stats.js                    GitHub 统计图表（含超时/失败降级）
 │   │   ├── toc.js                      文章页章节导航的滚动高亮
 │   │   └── blog-sidebar.js             首页分类侧栏：展开/收起 + 筛选
 │   ├── templates/
@@ -68,7 +70,11 @@ MoHanFox.github.io/
 ├── scripts/
 │   ├── build-issues.mjs                抓取带 blog 标签的 Issue → issues.json
 │   ├── markdown.mjs                    md → HTML（marked；原始 HTML 会被转义）
-│   └── build-blog.mjs                  issues.json → 列表页 + 各文章页
+│   ├── build-blog.mjs                  issues.json → 列表页 + 各文章页
+│   ├── lang-chart.mjs                  等距方块城市 + 圆环图的渲染（纯函数，数据 → SVG）
+│   ├── build-lang-chart.mjs            查 GitHub 官方 API → lang-chart.html/json
+│   ├── build-activity-card.mjs         抓 streak-stats → activity-card.html
+│   └── build-home.mjs                  把上面生成的片段注入 index.html（幂等）
 │
 └── .github/workflows/
     └── blog.yml                        issue → JSON → 页面 → gh-pages 的自动部署管线
@@ -87,12 +93,65 @@ MoHanFox.github.io/
 
 ### 2. GitHub 数据面板
 
-- **3D 语言维度**：`github-readme-stats` 的 top-langs 卡片；
-- **2D 活跃维度**：`github-readme-stats` 总览卡 + `streak-stats` 连续贡献卡。
+两个板块：
 
-> **重要已知限制**：这些公共统计服务在中国大陆网络下经常超时或被拦截。
-> `stats.js` 因此对每张图都做了降级：8 秒超时或加载失败时，换成一张中文提示卡片（附「前往 github.com/MoHanFox 查看」与「重试」按钮），**不会**出现布局塌陷或控制台报错。
-> 想彻底解决，可把 `stats.js` 顶部的 `CONFIG.readmeStatsBase` / `CONFIG.streakBase` 换成自建实例（例如自己部署一份 github-readme-stats）。
+| 板块 | 内容 |
+|---|---|
+| **01 语言分布** | 左边等距「方块城市」，右边二维圆环占比图 + 图例 |
+| **02 账号活跃** | streak-stats 的贡献日历与连续天数卡片 |
+
+#### 01 语言分布
+
+- **左栏 · 方块城市**：每种语言占若干个**独立的长条立方体**，每个立方体是**一个整体**
+  （不是几个正方体叠起来），**方块高度由该语言的占比决定**；
+- **右栏 · 圆环占比图** + 图例（色块 + 语言名 + 占比）。两栏配色一致，可以互相对照；
+- **主流与长尾**：前 5 种语言各自成组，其余归入长尾，但**长尾里每一项仍是各自独立的方块**，
+  不会合并成一个 `other` 方块；长尾统一取最浅的一档颜色；
+- **配色不用彩虹**：全部由站点主色 `#2d6bef` 派生的同色系，按占比降序由深到浅
+  —— 亮度本身就是一条可读信息；
+- **透视靠画家算法**：等距投影下屏幕位置会重叠，绘制顺序必须按网格坐标 `(a + b)` 升序
+  （该值越小离观察者越远，先画），否则远处的方块会盖住近处的，看起来"透视反了"。
+
+> ⚠️ **改这几个参数会明显影响观感**（都在 `scripts/build-lang-chart.mjs` 顶部）：
+> `CITY_BLOCK_TOTAL`（方块总数）、`CITY_COLUMNS`（网格列数）、`CITY_FOOTPRINT`（占地比例，决定街道缝隙）。
+> 方块**多而密**会糊成一整块板，**少而疏**才有城市轮廓。
+
+#### 数据来源与渲染时机（关键设计）
+
+两个板块都在 **Actions 构建时**取数并生成为静态内容，**不在浏览器里查**：
+
+| 方式 | 配额 | 谁消耗 |
+|---|---|---|
+| 客户端实时查（未认证） | **60 次/小时/IP** | 访客，且共享 IP 会互相挤掉 |
+| Actions 构建时查（内置 token） | **1000 次/小时/仓库** | 构建一次，访客零消耗 |
+
+- 语言数据来自 GitHub 官方 API（`/users/{owner}/repos` + 每个仓库的 `/languages`，后者给出精确字节数）；
+- 账号活跃来自 streak-stats 公共实例的 SVG；
+- 两者都由 `scripts/build-home.mjs` 注入 `index.html` 的标记之间，
+  所以**访客打开页面时零请求、零配额消耗**，还能被 CDN 缓存。
+
+**构建链路**：
+
+```bash
+node scripts/build-lang-chart.mjs      # GitHub API → assets/data/lang-chart.html
+node scripts/build-activity-card.mjs   # streak-stats → assets/data/activity-card.html
+node scripts/build-home.mjs            # 注入 index.html 的标记之间（幂等）
+```
+
+- `build-lang-chart.mjs` 支持 `--from-file`（离线）、`--token`、`--out`；未认证时仅 60 次/小时，仓库多会失败，所以 Actions 里必须带 `GITHUB_TOKEN`；
+- 单仓库 `/languages` 失败会退回按 `size` 估算，不会让整张图失败；仓库超过 60 个则整体改用估算，避免打满配额；
+- `build-activity-card.mjs` 会**校验响应确实是 SVG**，避免把第三方错误页原样内联进站点；
+- **容错**：两个产物都提交进仓库，生成步骤失败时脚本非零退出且**不覆盖**它们，
+  注入仍拿到上一版可用内容，首页不会缺板块，同时日志会明确报错；
+- **数据会随工作流刷新**：push 到 `dev`、issue 事件、手动 dispatch 都会重新取数。
+  想立刻刷新图表：**Actions → blog-pipeline → Run workflow**。
+
+> **历史背景**：两个统计图原本都用 `github-readme-stats` 与 `streak-stats` 的公共实例。
+> 但 `github-readme-stats` 的官方 Vercel 实例已被作者**主动暂停**
+> （[anuraghazra/github-readme-stats#4661](https://github.com/anuraghazra/github-readme-stats/issues/4661)，连根路径都返回 503），
+> 同类镜像要么返回空图、要么没配 token 直接报错。
+> 所以语言分布改为**自绘 + GitHub 官方 API**；账号活跃因为 streak-stats 仍然可用而保留，
+> 但改成构建时抓取内联，访客不再依赖它的可达性。
 
 ### 3. 个人简历树
 
@@ -158,13 +217,28 @@ MoHanFox.github.io/
 
 ### 发文约定
 
+仓库里配好了 Issue 模板（`.github/ISSUE_TEMPLATE/`）：
+
+| 模板 | 用途 |
+|---|---|
+| **博客文章** | 自动带上 `blog` 标签，正文预置 Markdown 骨架与写法示例 |
+| **普通 Issue** | 网站建议 / 功能想法 / 问题反馈，**不带** `blog`，不会被发布 |
+| 空白 Issue | 保留（`config.yml` 里 `blank_issues_enabled: true`） |
+
+用「博客文章」模板建 Issue 时 `blog` 标签会自动带上，但**分类标签要自己选**
+（GitHub 不允许模板预置自定义标签）。分类层级用 `/` 表示：打 `Go/精选` 就会出现在侧栏「Go → 精选」下面。
+
 | 约定 | 说明 |
 |---|---|
 | 文章标识 | `blog` 标签（大小写不敏感） |
 | 草稿 | 加 `draft` 标签则不发布（`blog` + `draft` 同时存在也不发布） |
 | 摘要 | 正文中插入 `<!--more-->`，其之前的内容作为摘要；没有则取前 200 字符 |
 | 其它标签 | 会作为文章的 `tags` 输出（`blog`、`draft` 除外） |
+| 作者 | 取 Issue 的**创建者**，列表页与文章页都显示为「作者 - 日期」（作者名链到其 GitHub 主页） |
 | 排序 | 按 Issue 的 `updatedAt` 倒序 |
+
+> 「作者」来自 API 的 `issue.user.login`，所以**改不了** —— 谁建的 Issue 就是谁。
+> 若数据里没有作者字段（例如旧数据、或换用其它数据源），页面会**只显示日期**，不会留一个孤零零的横线。
 
 ### 启用步骤（首次）
 
