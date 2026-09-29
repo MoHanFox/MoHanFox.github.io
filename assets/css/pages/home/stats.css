@@ -21,7 +21,12 @@
 }
 
 .stats-mount--lang {
-    max-width: 620px;
+    max-width: 1040px;
+    margin: 0 auto;
+}
+
+.stats-mount--flat {
+    max-width: 940px;
     margin: 0 auto;
 }
 
@@ -48,52 +53,91 @@
     color: var(--color-primary);
 }
 
-/* ---------- 语言分布「方块城市」 ---------- */
+/* ---------- 语言分布面板：左城市 + 右（圆环 + 右侧图例） ---------- */
 
-.lang-city-wrap {
+.lang-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 40px;
     width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+}
+
+.lang-panel-city {
+    min-width: 0;
 }
 
 .lang-city {
     display: block;
     width: 100%;
     height: auto;
+    overflow: visible;
 }
 
-/* 图例：等距斜面上的字很难读，数值统一放在图外 */
+/* 右栏：圆环在左、占比文字在**右边** */
+.lang-panel-chart {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-width: 0;
+}
+
+.lang-panel-donut {
+    width: 140px;
+    flex: 0 0 auto;
+}
+
+.lang-donut {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* 图例：色块 + 语言名 + 占比，垂直排列；最后一行是 others 合计 */
 .lang-legend {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 9px 20px;
-    margin: 20px 0 0;
+    flex-direction: column;
+    gap: 7px;
+    margin: 0;
     padding: 0;
     list-style: none;
+    min-width: 0;
 }
 
 .lang-legend-item {
-    display: flex;
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     font-family: var(--font-light);
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--color-ink);
+    white-space: nowrap;
+}
+
+/* others 一行用略淡的字色，表明它是长尾合计而不是某一种语言 */
+.lang-legend-item.is-others .lang-legend-name {
+    color: var(--color-muted);
 }
 
 .lang-legend-swatch {
-    width: 11px;
-    height: 11px;
+    width: 10px;
+    height: 10px;
     border-radius: 3px;
-    flex: 0 0 auto;
 }
 
 .lang-legend-share {
     color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
 }
 
 /* 数据来源与生成时间：字号更小、颜色更淡，不抢主体 */
 .lang-city-note {
-    margin: 16px 0 0;
+    margin: 20px 0 0;
     font-family: var(--font-light);
     font-size: 12px;
     text-align: center;
@@ -112,7 +156,34 @@
     color: var(--color-muted);
 }
 
+/* ---------- 账号活跃（第三方 SVG 内联） ----------
+   第三方 SVG 自带固定宽高与内联字体，不受本站令牌影响，
+   所以这里只负责容器尺寸与居中，不强行改它的内部样式。 */
+.activity-card {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.activity-card svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
 /* ---------- 小屏 ---------- */
+@media (max-width: 900px) {
+    .lang-panel {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 30px;
+    }
+
+    .lang-panel-chart {
+        justify-content: flex-start;
+        gap: 16px;
+    }
+}
+
 @media (max-width: 768px) {
     .stats {
         padding: 76px 0;
@@ -122,12 +193,11 @@
         margin-top: 48px;
     }
 
-    .stats-mount--lang {
-        max-width: 100%;
+    .lang-panel-donut {
+        width: 110px;
     }
 
-    .lang-legend {
-        gap: 8px 14px;
+    .lang-legend-item {
         font-size: 12px;
     }
 }
