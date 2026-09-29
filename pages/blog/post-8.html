@@ -12,13 +12,24 @@
     <link rel="stylesheet" href="../../assets/css/navbar.css">
     <!-- 与列表页共用同一份博客样式 -->
     <link rel="stylesheet" href="../../assets/css/pages/blog/blog.css">
-
+    <!-- 章节导航样式 -->
+    <link rel="stylesheet" href="../../assets/css/pages/blog/toc.css">
     <!-- 评论区样式（与博客样式分开，未启用评论时不加载） -->
     <link rel="stylesheet" href="../../assets/css/pages/blog/giscus.css">
 </head>
 <body class="page-blog">
 
-    
+        <aside class="blog-toc" data-toc aria-label="文章目录">
+        <p class="blog-toc-title">目录</p>
+        <nav class="blog-toc-nav">
+            <ul class="blog-toc-list">
+        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E9%A1%B9%E7%9B%AE%E5%87%86%E5%A4%87" title="项目准备" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">项目准备</span></a></li>
+        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E4%BB%A3%E7%A0%81%E5%87%86%E5%A4%87" title="代码准备" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">代码准备</span></a></li>
+        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E6%8B%93%E5%B1%95%E4%BD%A0%E7%9A%84%E6%8E%A5%E5%8F%A3%E4%B8%8ERest%E8%A7%84%E5%88%99" title="拓展你的接口与Rest规则" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">拓展你的接口与Rest规则</span></a></li>
+        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#Rest%E8%A7%84%E5%88%99" title="Rest规则:" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">Rest规则:</span></a></li>
+            </ul>
+        </nav>
+    </aside>
 
     <main class="blog-wrap">
         <article>
@@ -50,6 +61,7 @@
 <ol>
 <li>创造你的Go目录</li>
 <li>为你的项目装载以上模块</li>
+<li>本项目以<strong>自定义的Go控制台模拟前端</strong> + <strong>Go后端</strong>为示例进行</li>
 </ol>
 <pre><code class="language-go.mod">require (
 	github.com/gin-contrib/cors v1.7.9          //官方的Cors，本章节也会提供定制Cors
@@ -60,9 +72,39 @@
 )
 </code></pre>
 <ol start="3">
-<li>开始
-Drift，待更新</li>
+<li>开始编写你的简易后端</li>
 </ol>
+<h1 id="代码准备">代码准备
+</h1>
+<ol>
+<li>创建你的第一个 Gin 应用</li>
+</ol>
+<pre><code class="language-mian.go">package main
+
+import &quot;github.com/gin-gonic/gin&quot;
+
+func main() {
+  router := gin.Default()
+  router.GET(&quot;/ping&quot;, func(c *gin.Context) {
+    c.JSON(200, gin.H{
+      &quot;message&quot;: &quot;pong&quot;,
+    })
+  })
+  router.Run() // listens on 0.0.0.0:8080 by default
+}
+</code></pre>
+<p>使用以下命令启动服务器：</p>
+<pre><code>go run main.go
+</code></pre>
+<p>在浏览器中访问 <a href="http://localhost:8080/ping" target="_blank" rel="noopener noreferrer">http://localhost:8080/ping</a>
+你应该会看到：</p>
+<pre><code>{&quot;message&quot;:&quot;pong&quot;}
+</code></pre>
+<p>恭喜你，你可以把你的gin应用做大做强了！</p>
+<h1 id="拓展你的接口与Rest规则">拓展你的接口与Rest规则
+</h1>
+<h2 id="Rest规则">Rest规则:</h2>
+<p>咕咕咕，之后再写</p>
 
             </div>
         </article>
@@ -97,6 +139,7 @@ Drift，待更新</li>
 
     <!-- 通用导航栏（本页位于 /pages/blog/，需上跳两级） -->
     <script src="../../assets/js/navbar.js"></script>
-
+    <!-- 章节导航：滚动高亮 -->
+    <script src="../../assets/js/toc.js"></script>
 </body>
 </html>
