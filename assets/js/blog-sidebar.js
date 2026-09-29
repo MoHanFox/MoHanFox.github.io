@@ -25,9 +25,24 @@
 
     var input = document.querySelector('[data-search-input]');
     var clearBtn = document.querySelector('[data-search-clear]');
+    var scopeSelect = document.querySelector('[data-search-scope]');
     var filterButtons = sidebar ? Array.prototype.slice.call(sidebar.querySelectorAll('[data-filter]')) : [];
 
-    var state = { cat: '', query: '' };
+    /**
+     * state.scope 决定搜哪个字段：
+     *   'meta'    标题 + 摘要 + 标签（构建时写进 data-text）
+     *   'content' 文章正文（构建时写进 data-content，超长会截断以控制页面体积）
+     */
+    var state = { cat: '', query: '', scope: 'meta' };
+
+    var SCOPE_PLACEHOLDER = {
+        meta: '搜索标题、摘要或标签…',
+        content: '搜索文章内的关键字…'
+    };
+    var SCOPE_LABEL = {
+        meta: '标题、摘要、标签',
+        content: '文章内关键字'
+    };
 
     /* ---------------- 卡片数据 ---------------- */
 
@@ -36,9 +51,10 @@
         return raw ? raw.split(/\s+/).filter(Boolean) : [];
     }
 
-    /** 关键词检索用的纯文本：标题 + 摘要 + 标签，构建时已写好 */
+    /** 关键词检索用的纯文本：按当前范围取 data-text 或 data-content */
     function cardText(card) {
-        return (card.getAttribute('data-text') || '').toLowerCase();
+        var attr = state.scope === 'content' ? 'data-content' : 'data-text';
+        return (card.getAttribute(attr) || '').toLowerCase();
     }
 
     /** 命中分类：完全相等，或所选分类是该文章分类的祖先路径 */
@@ -122,7 +138,7 @@
         if (!statusEl) return;
         var parts = [];
         if (state.cat) parts.push('分类：' + state.cat);
-        if (state.query) parts.push('搜索：' + state.query);
+        if (state.query) parts.push('搜索「' + state.query + '」（' + SCOPE_LABEL[state.scope] + '）');
 
         if (!parts.length) {
             statusEl.textContent = '';
@@ -160,6 +176,9 @@
             else url.searchParams.delete('cat');
             if (state.query) url.searchParams.set('q', state.query);
             else url.searchParams.delete('q');
+            // 只有非默认范围才写进 URL，避免地址栏里出现冗余参数
+            if (state.query && state.scope !== 'meta') url.searchParams.set('scope', state.scope);
+            else url.searchParams.delete('scope');
             window.history.replaceState(null, '', url.pathname + url.search + url.hash);
         } catch (error) {
             // 例如 file:// 下的异常：筛选照常工作，只是不同步到地址栏
@@ -236,10 +255,31 @@
         });
     }
 
+    /** 输入框的提示语与选择框保持一致 */
+    function syncPlaceholder() {
+        if (input) input.setAttribute('placeholder', SCOPE_PLACEHOLDER[state.scope] || SCOPE_PLACEHOLDER.meta);
+    }
+
+    if (scopeSelect) {
+        scopeSelect.addEventListener('change', function () {
+            state.scope = scopeSelect.value === 'content' ? 'content' : 'meta';
+            syncPlaceholder();
+            // 换范围后清空关键字：否则旧关键字在新范围下可能一篇都搜不到，让人以为坏了
+            if (state.query) {
+                state.query = '';
+                if (input) input.value = '';
+            }
+            apply(true);
+            if (input) input.focus();
+        });
+    }
+
     // 浏览器前进 / 后退
     window.addEventListener('popstate', function () {
         readUrl();
         if (input) input.value = state.query;
+        if (scopeSelect) scopeSelect.value = state.scope;
+        syncPlaceholder();
         apply(false);
     });
 
@@ -248,9 +288,11 @@
             var params = new URL(window.location.href).searchParams;
             state.cat = params.get('cat') || '';
             state.query = normalize(params.get('q'));
+            state.scope = params.get('scope') === 'content' ? 'content' : 'meta';
         } catch (error) {
             state.cat = '';
             state.query = '';
+            state.scope = 'meta';
         }
     }
 
@@ -258,6 +300,8 @@
 
     readUrl();
     if (input) input.value = state.query;
+    if (scopeSelect) scopeSelect.value = state.scope;
+    syncPlaceholder();
     if (state.cat) revealAncestors(state.cat);
     apply(false);
 })();

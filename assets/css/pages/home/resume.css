@@ -105,7 +105,7 @@
     bottom: 4px;
     width: 2px;
     border-radius: 2px;
-    background: rgba(45, 107, 239, 0.32);
+    background: rgb(23 117 255 / 0.8);
 }
 
 .resume-list {
@@ -132,7 +132,7 @@
     background: rgba(45, 107, 239, 0.32);
 }
 
-/* 分支横线：从子级竖线连到节点方块 */
+/* 分支横线：从子级竖线连到节点方块 */ /*已隐藏*/
 .resume-children::after {
     content: "";
     position: absolute;
@@ -140,7 +140,7 @@
     left: 0;
     width: 19px;
     height: 2px;
-    background: rgba(45, 107, 239, 0.32);
+    background: rgba(45, 107, 239, 0.0);
 }
 
 .resume-node {
@@ -165,6 +165,7 @@
     border-radius: 0;
     background: #ffffff;
     box-sizing: border-box;
+    margin-left: 10px;
 }
 
 /* 子级正方形：实心，与线同色。

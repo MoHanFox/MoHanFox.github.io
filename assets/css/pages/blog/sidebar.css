@@ -223,6 +223,51 @@
     color: var(--color-primary);
 }
 
+/* ---------- 搜索范围选择框（搜索栏下方） ---------- */
+.blog-search-scope {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.blog-search-scope-label {
+    font-family: var(--font-light);
+    font-size: 12.5px;
+    color: var(--color-muted);
+}
+
+.blog-search-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 5px 28px 5px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+    /* 自绘下拉箭头，省一个图标请求 */
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-muted) 50%),
+        linear-gradient(135deg, var(--color-muted) 50%, transparent 50%);
+    background-position: calc(100% - 15px) 12px, calc(100% - 10px) 12px;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    font-family: var(--font-light);
+    font-size: 13px;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: var(--ease-base);
+}
+
+.blog-search-select:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.blog-search-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(45, 107, 239, 0.12);
+}
+
 /* ---------- 当前筛选提示 ---------- */
 .blog-filter {
     margin: 0 0 18px;
