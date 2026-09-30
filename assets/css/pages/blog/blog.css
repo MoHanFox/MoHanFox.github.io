@@ -201,6 +201,29 @@
     text-decoration: none;
 }
 
+/* 「创建于 / 修改于」两段是一组，用细竖线分隔；
+   容器 gap 有 14px，所以这里把两侧收一点，读起来是一个整体 */
+.blog-byline-times {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.blog-byline-bar {
+    color: var(--color-border);
+    /* 与 .blog-byline-sep 同理：抵消容器 gap，让竖线不孤零零 */
+    margin: 0 -4px;
+}
+
+.blog-byline-label {
+    color: var(--color-muted);
+}
+
+.blog-byline-date {
+    /* 等宽风格的日期更好对齐，也和站点其它数字一致 */
+    font-variant-numeric: tabular-nums;
+}
+
 a.blog-byline-author:hover {
     color: var(--color-primary);
     text-decoration: underline;
