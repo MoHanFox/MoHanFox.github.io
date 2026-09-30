@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T03:14:19.090Z",
+  "generatedAt": "2026-09-30T03:15:04.193Z",
   "owner": "MoHanFox",
   "giteeOwner": "MoHanBi",
   "repoCount": 3,
@@ -9,30 +9,22 @@
       "bytes": 397339
     },
     "gitee": {
-      "languages": 11,
-      "bytes": 790773
+      "languages": 8,
+      "bytes": 411604
     }
   },
   "languages": [
     {
       "name": "JavaScript",
-      "bytes": 475828
-    },
-    {
-      "name": "C#",
-      "bytes": 206972
-    },
-    {
-      "name": "HTML",
-      "bytes": 148116
+      "bytes": 418985
     },
     {
       "name": "CSS",
-      "bytes": 142857
+      "bytes": 132190
     },
     {
-      "name": "ShaderLab",
-      "bytes": 62998
+      "name": "HTML",
+      "bytes": 131336
     },
     {
       "name": "Java",
@@ -47,12 +39,8 @@
       "bytes": 24622
     },
     {
-      "name": "GLSL",
-      "bytes": 22081
-    },
-    {
-      "name": "HLSL",
-      "bytes": 13952
+      "name": "C#",
+      "bytes": 11124
     },
     {
       "name": "Python",
