@@ -18,7 +18,7 @@
 }
 
 /* ------------------------------------------------------------
-   备用视觉资源：assets/img/welcome.png
+   备用视觉资源：assets/img/welcome.avif
    原 .Page_Background 规则引用路径错误（跳出了站点根）且未在页面启用，
    故未保留。需要启用时按下列写法自行添加到 <body> 中：
 
@@ -27,7 +27,7 @@
    .page-background {
        position: fixed;
        inset: 0;
-       background: url('../../img/welcome.png') center / cover no-repeat fixed;
+       background: url('../../img/welcome.avif') center / cover no-repeat fixed;
        z-index: -1;
        pointer-events: none;
    }
