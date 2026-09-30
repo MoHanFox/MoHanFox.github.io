@@ -29,14 +29,12 @@ import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
 import { renderMarkdown, escapeHtml, toPlainText, markedVersion } from './markdown.mjs';
-import { NOVELMODE_TAGS, POST_LABEL } from './build-issues.mjs';
+import { NOVELMODE_TAGS, POST_LABEL, sortIssues } from './build-issues.mjs';
 
 const DEFAULT_DATA = 'pages/blog/data/issues.json';
 const DEFAULT_OUT_DIR = 'pages/blog';
 const TEMPLATE_DIR = 'assets/templates/blog';
 const POST_FILE_PREFIX = 'post-';
-/** 更新与创建相差超过这个天数才提示「编辑于」 */
-const EDIT_HINT_DAYS = 2;
 /** giscus（评论）配置；缺失时文章页照常生成，只是不显示评论区 */
 const GISCUS_CONFIG_FILE = 'giscus.json';
 const GISCUS_STYLE_TAG =
@@ -300,7 +298,11 @@ export function formatDate(iso) {
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
 }
 
-/** 两个时间相差是否超过若干天 */
+/**
+ * 两个时间相差几天。
+ * byline 改为直接比较「创建日期 vs 修改日期」后它暂无调用方，
+ * 保留是因为它是个通用工具，将来若要「改动很小就不标注」会用得上。
+ */
 export function daysApart(fromIso, toIso) {
   const a = Date.parse(fromIso ?? '');
   const b = Date.parse(toIso ?? '');
@@ -332,10 +334,19 @@ function renderTags(tags) {
 /** 文章正文写进 data-content 时保留的最大字符数（搜索结果用，截断只为控制页面体积） */
 const SEARCH_CONTENT_LIMIT = 3000;
 
-/** 卡片与文章页共用：作者 - 日期。作者名做成 GitHub 链接（若具备条件），二者之间补一个分隔符。 */
+/**
+ * 卡片与文章页共用：作者 - 创建于: YYYY-MM-DD 丨 修改于: YYYY-MM-DD
+ *
+ * 带上创建与修改两个时间，读者能看出「这篇是什么时候写的、后来有没有改过」。
+ * 两者相同（写完就没再动过）时只显示创建时间，避免同一日期重复两遍显得啰嗦。
+ * 作者名做成 GitHub 链接（若具备条件）。
+ */
 function renderByline(issue) {
   const author = typeof issue.author === 'string' ? issue.author.trim() : '';
-  const date = formatDate(issue.createdAt || issue.updatedAt);
+  const createdIso = issue.createdAt || issue.updatedAt;
+  const created = formatDate(createdIso);
+  const updatedIso = issue.updatedAt;
+  const updated = formatDate(updatedIso);
   const parts = [];
 
   if (author) {
@@ -347,10 +358,24 @@ function renderByline(issue) {
       : `<span class="blog-byline-author">${safeAuthor}</span>`;
     parts.push(linked);
   }
-  if (author && date) parts.push('<span class="blog-byline-sep" aria-hidden="true">-</span>');
-  if (date) parts.push(`<time class="blog-byline-date" datetime="${escapeHtml(isoDate(issue.createdAt || issue.updatedAt))}">${date}</time>`);
 
-  return parts.join('');
+  const times = [];
+  if (created) {
+    times.push(`<span class="blog-byline-label">创建于:</span> ` +
+      `<time class="blog-byline-date" datetime="${escapeHtml(isoDate(createdIso))}">${created}</time>`);
+  }
+  // 只有真的改过（日期不同）才显示「修改于」，否则同一日期出现两次很啰嗦
+  if (updated && updated !== created) {
+    times.push(`<span class="blog-byline-label">修改于:</span> ` +
+      `<time class="blog-byline-date" datetime="${escapeHtml(isoDate(updatedIso))}">${updated}</time>`);
+  }
+
+  // 用 `丨` 分隔创建与修改（比 `-` 更像一个「两段信息」的分隔）
+  if (times.length) {
+    parts.push(`<span class="blog-byline-times">${times.join('<span class="blog-byline-bar" aria-hidden="true">丨</span>')}</span>`);
+  }
+
+  return parts.join('<span class="blog-byline-sep" aria-hidden="true">-</span>');
 }
 
 /** 取出 ISO 日期（YYYY-MM-DD）供 <time datetime> 用；解析失败返回空串 */
@@ -547,12 +572,11 @@ function renderPostsBlock(issues, categories) {
   return `        <ul class="blog-list" data-list>\n${cards}\n        </ul>`;
 }
 
-/** 文章页里「编辑于」提示的片段 */
-function renderUpdatedHint(issue) {
-  if (daysApart(issue.createdAt, issue.updatedAt) < EDIT_HINT_DAYS) return '';
-  const date = formatDate(issue.updatedAt);
-  return date ? `<span>编辑于 ${date}</span>` : '';
-}
+/**
+ * 注意：文章页头部的 meta 现在由 renderByline() 一次产出
+ * （作者 - 创建于: … 丨 修改于: …），模板里的 {{UPDATED}} 已移除，
+ * 不再额外输出「编辑于」片段，避免同一信息出现两次。
+ */
 
 /* ------------------------------------------------------------------ */
 /* 主流程                                                              */
@@ -563,7 +587,10 @@ export async function buildPages(payload, repo, giscusConfig = null) {
   const indexTpl = await readFile(path.join(TEMPLATE_DIR, 'index.html'), 'utf8');
   const postTpl = await readFile(path.join(TEMPLATE_DIR, 'post.html'), 'utf8');
 
-  const issues = Array.isArray(payload?.issues) ? payload.issues : [];
+  // 列表顺序按 issue 序号从高到低。
+  // 这里显式排一次，而不是依赖 issues.json 已经排好 —— 否则换一份数据源
+  // （夹具、手工准备的 JSON）顺序就会跟着输入变，列表顺序不受控。
+  const issues = sortIssues(Array.isArray(payload?.issues) ? payload.issues : []);
   const generatedAt = formatDate(payload?.generatedAt) || '';
   const slug = repo || payload?.repo || '';
 
@@ -606,10 +633,9 @@ export async function buildPages(payload, repo, giscusConfig = null) {
       PAGE_DESCRIPTION: escapeHtml(toMetaText(excerpt)),
       NUMBER: String(number),
       TITLE: escapeHtml(title),
-      // 作者与日期合并成一个 byline（作者 - 日期），模板里不再单独使用 DATE
+      // 作者与创建/修改时间合并成一个 byline，模板里不再单独使用 DATE / UPDATED
       AUTHOR: renderByline(issue),
       DATE: formatDate(issue.createdAt || issue.updatedAt),
-      UPDATED: renderUpdatedHint(issue),
       STATE: String(issue.state).toLowerCase() === 'closed'
         ? '<span class="blog-tag blog-tag--closed">已关闭</span>'
         : '',
