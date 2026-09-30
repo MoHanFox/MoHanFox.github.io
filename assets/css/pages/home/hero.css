@@ -37,7 +37,7 @@
 .hero-scrim {
     position: absolute;
     inset: 0;
-    background: rgba(10, 16, 36, 0.15); /*根据背景自行调整*/
+    background: rgba(10, 16, 36, 0.32); /*根据背景自行调整*/
 }
 
 /* ---------- 标题 ---------- */
