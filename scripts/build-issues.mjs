@@ -159,16 +159,27 @@ export function normalizeIssue(issue) {
   };
 }
 
-/** updatedAt 倒序（解析失败的排最后），同刻回退用 number 倒序保证稳定。 */
+/**
+ * 按 issue **序号从高到低**排序。
+ *
+ * 早先是按 updatedAt 倒序，结果是「改了一下旧文章，它就窜到列表最前面」——
+ * 对读者来说顺序会莫名其妙地变。issue 号本身就是稳定的发布顺序，
+ * 用它能保证「新写的在最上面，旧文章修改后仍留在原位」。
+ *
+ * 兜底：没有 number 的数据（例如旧版本生成的文件）退回按创建时间倒序；
+ * 号相同（不该发生）再按 updatedAt 倒序，保证排序结果稳定。
+ */
 export function sortIssues(issues) {
   const ts = (value) => {
     const parsed = Date.parse(value ?? '');
     return Number.isNaN(parsed) ? 0 : parsed;
   };
   return [...issues].sort((a, b) => {
-    const diff = ts(b.updatedAt) - ts(a.updatedAt);
-    if (diff !== 0) return diff;
-    return (b.number || 0) - (a.number || 0);
+    const byNumber = (Number(b.number) || 0) - (Number(a.number) || 0);
+    if (byNumber !== 0) return byNumber;
+    const byCreated = ts(b.createdAt) - ts(a.createdAt);
+    if (byCreated !== 0) return byCreated;
+    return ts(b.updatedAt) - ts(a.updatedAt);
   });
 }
 
