@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T03:38:31.273Z",
+  "generatedAt": "2026-10-01T11:04:22.079Z",
   "repo": "MoHanFox/MoHanFox.github.io",
   "count": 20,
   "issues": [
@@ -365,12 +365,12 @@
     },
     {
       "number": 8,
-      "title": "使用Go快速搭建简易后端",
+      "title": "使用Go搭建后端示例",
       "author": "MoHanFox",
       "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/8",
       "state": "open",
       "createdAt": "2026-09-29T15:09:50Z",
-      "updatedAt": "2026-09-29T18:36:06Z",
+      "updatedAt": "2026-10-01T11:04:05Z",
       "labels": [
         "blog",
         "Go/精选",
@@ -382,8 +382,8 @@
         "Go",
         "日常学习"
       ],
-      "body": "使用的Go模块: \n- Gin:  Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。\n- Gorm:  GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。\n    > 本章节使用 MySQL 数据库作演示\n- Viper:  Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，包括JSON、TOML、YAML、HCL、envfile和Java属性文件。\n- Go: [Go](https://go.dev/) [1.25](https://go.dev/doc/devel/release#go1.25) 或更高版本\n\n# 项目准备\n1. 创造你的Go目录\n2. 为你的项目装载以上模块\n3. 本项目以**自定义的Go控制台模拟前端** + **Go后端**为示例进行\n\n```go.mod\nrequire (\n\tgithub.com/gin-contrib/cors v1.7.9          //官方的Cors，本章节也会提供定制Cors\n\tgithub.com/gin-gonic/gin v1.12.0\n\tgithub.com/spf13/viper v1.21.0\n\tgorm.io/driver/mysql v1.6.0\n\tgorm.io/gorm v1.31.2\n)\n```\n3. 开始编写你的简易后端\n\n# 代码准备\n1. 创建你的第一个 Gin 应用\n```mian.go\npackage main\n\nimport \"github.com/gin-gonic/gin\"\n\nfunc main() {\n  router := gin.Default()\n  router.GET(\"/ping\", func(c *gin.Context) {\n    c.JSON(200, gin.H{\n      \"message\": \"pong\",\n    })\n  })\n  router.Run() // listens on 0.0.0.0:8080 by default\n}\n```\n使用以下命令启动服务器：\n```\ngo run main.go\n```\n在浏览器中访问 http://localhost:8080/ping\n你应该会看到：\n```json\n{\"message\":\"pong\"}\n```\n恭喜你，你可以把你的gin应用做大做强了！\n\n# 拓展你的接口与Rest规则\n## Rest规则:\n## 拓展你的接口:\n# Cors\n\n咕咕咕，之后再写",
-      "excerpt": "使用的Go模块: - Gin: Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。 - Gorm: GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。 > 本章节使用 MySQL 数据库作演示 - Viper: Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，"
+      "body": "# 项目说明\n该博客旨在总结自己的Go学习，同时帮助您理解一些Go后端常用的模块组合\n本项目使用**REST风格**\n此博客以**短链生成网站**为模板为例子\n\n使用的Go模块: \n- Gin:  Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。\n- Gorm:  GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。\n    > 本章节使用 MySQL 数据库作演示\n- Viper:  Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，包括JSON、TOML、YAML、HCL、envfile和Java属性文件。\n- Go: [Go](https://go.dev/) [1.25](https://go.dev/doc/devel/release#go1.25) 或更高版本\n\n# 项目准备\n1. 创造你的Go目录\n2. 为你的项目装载以上模块\n\n```go.mod\nrequire (\n\tgithub.com/gin-contrib/cors v1.7.9          //官方的Cors，本章节也会提供定制Cors\n\tgithub.com/gin-gonic/gin v1.12.0\n\tgithub.com/spf13/viper v1.21.0\n\tgorm.io/driver/mysql v1.6.0\n\tgorm.io/gorm v1.31.2\n)\n```\n3. 开始编写你的简易后端\n\n# 代码准备\n1. 创建你的第一个 Gin 应用\n```mian.go\npackage main\n\nimport \"github.com/gin-gonic/gin\"\n\nfunc main() {\n  router := gin.Default()        //注册一个路由\n  router.GET(\"/ping\", func(c *gin.Context) {        //为路由添加API\n    c.JSON(200, gin.H{\n      \"message\": \"pong\",\n    })\n  })\n  router.Run() // listens on 0.0.0.0:8080 by default\n}\n```\n使用以下命令启动服务器：\n```\ngo run main.go\n```\n在浏览器中访问 http://localhost:8080/ping\n你应该会看到：\n```json\n{\"message\":\"pong\"}\n```\n恭喜你，你可以把你的gin应用做大做强了！\n\n# 拓展你的接口与Rest规则\n\n## Rest规则\nRESTful（Representational State Transfer）是一套 面向资源的 API 设计方法论，而非强制标准，核心目标是让接口具备「可读性强、可扩展、无状态、跨平台」的特性，是目前前后端 / 移动端接口设计的主流规范。详细可见：\n\nGin 不是按 REST 规则设计的框架，它是一个通用的 Go HTTP Web 框架/路由框架。它“可以”用来写 RESTful API，而且很适合，但是否 RESTful 取决于你怎么设计接口，而不是 Gin 本身。\n\nGin 并不强制 REST：你可以用 Gin 写：https://blog.csdn.net/qq_37257657/article/details/81206520#\n```go\nr.POST(\"/getUser\", getUser)\nr.GET(\"/deleteUser\", deleteUser)\n```\nGin 也可以很容易写 RESTful 风格：\n```go\nr.GET(\"/users/:id\", getUser)\nr.POST(\"/users\", createUser)\nr.PUT(\"/users/:id\", updateUser)\nr.DELETE(\"/users/:id\", deleteUser)\n```\n为了让你的项目可读，可积极使用RESTful风格，本项目使用REST风格为例\n\n## 拓展你的接口\n本博客以短链生成网站为例子\n\n### 分析需求：\n注册、登录,密码 bcrypt 哈希后入库\n登录签发随机 token,写入会话表,带有效期(默认 24 小时)\n鉴权中间件统一校验 token,未登录返回 401\n创建短链,后端生成唯一短码,按配置的公开地址拼出 short_url\n查看自己的短链列表和详情\n删除自己的短链\n访问短链 302 跳转,并给点击数 +1\n数据隔离:每个人只能看到和操作自己的短链\n每日创建配额:每个用户每天最多创建 N 条,超出返回 429\nCORS 配置化:允许的跨域来源写在配置里\n### 设计API\n为了更好地管理您的路由，你可以在跟目录创建一个 `Handler` 文件夹，并创建router.go\n```router.go\nfunc RegisterRoutes(r *gin.Engine) {\n\tapi := r.Group(\"/api/v1\")\n\t{\n\t\t// 我们先从登录做起\n\t\tapi.POST(\"/auth/register\", Register)\n\t\tapi.POST(\"/auth/login\", Login)\n\t}\n\n\t// 访问短链接不需要登录,直接 302 跳转\n\tr.GET(\"/r/:code\", Redirect)\n}\n```\n\n# 注册、登录与初识Gorm\n\n咕咕咕，之后再写",
+      "excerpt": "# 项目说明 该博客旨在总结自己的Go学习，同时帮助您理解一些Go后端常用的模块组合 本项目使用**REST风格** 此博客以**短链生成网站**为模板为例子 使用的Go模块: - Gin: Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。 - Gorm: GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库"
     },
     {
       "number": 5,

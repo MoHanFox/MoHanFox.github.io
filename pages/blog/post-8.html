@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>使用Go快速搭建简易后端 · 漠寒 MOHAN</title>
-    <meta name="description" content="使用的Go模块: Gin: Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。 Gorm: GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。 &gt; 本章节使用 MySQL 数据库作演示 Viper: Viper是一个流行的Go库，…">
+    <title>使用Go搭建后端示例 · 漠寒 MOHAN</title>
+    <meta name="description" content="项目说明 该博客旨在总结自己的Go学习，同时帮助您理解一些Go后端常用的模块组合 本项目使用REST风格 此博客以短链生成网站为模板为例子 使用的Go模块: Gin: Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。 Gorm: GORM 通过将 Go 结构体（Go…">
 
     <!-- 全局样式：base（字体+令牌）→ components（通用组件）→ navbar（导航栏） -->
     <link rel="stylesheet" href="../../assets/css/base.css">
@@ -23,12 +23,15 @@
         <p class="blog-toc-title">目录</p>
         <nav class="blog-toc-nav">
             <ul class="blog-toc-list">
+        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E9%A1%B9%E7%9B%AE%E8%AF%B4%E6%98%8E" title="项目说明" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">项目说明</span></a></li>
         <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E9%A1%B9%E7%9B%AE%E5%87%86%E5%A4%87" title="项目准备" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">项目准备</span></a></li>
         <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E4%BB%A3%E7%A0%81%E5%87%86%E5%A4%87" title="代码准备" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">代码准备</span></a></li>
         <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E6%8B%93%E5%B1%95%E4%BD%A0%E7%9A%84%E6%8E%A5%E5%8F%A3%E4%B8%8ERest%E8%A7%84%E5%88%99" title="拓展你的接口与Rest规则" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">拓展你的接口与Rest规则</span></a></li>
-        <li class="blog-toc-item blog-toc-item--3"><a class="blog-toc-link" href="#Rest%E8%A7%84%E5%88%99" title="Rest规则:" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">Rest规则:</span></a></li>
-        <li class="blog-toc-item blog-toc-item--3"><a class="blog-toc-link" href="#%E6%8B%93%E5%B1%95%E4%BD%A0%E7%9A%84%E6%8E%A5%E5%8F%A3" title="拓展你的接口:" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">拓展你的接口:</span></a></li>
-        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#Cors" title="Cors" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">Cors</span></a></li>
+        <li class="blog-toc-item blog-toc-item--3"><a class="blog-toc-link" href="#Rest%E8%A7%84%E5%88%99" title="Rest规则" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">Rest规则</span></a></li>
+        <li class="blog-toc-item blog-toc-item--3"><a class="blog-toc-link" href="#%E6%8B%93%E5%B1%95%E4%BD%A0%E7%9A%84%E6%8E%A5%E5%8F%A3" title="拓展你的接口" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">拓展你的接口</span></a></li>
+        <li class="blog-toc-item blog-toc-item--4"><a class="blog-toc-link" href="#%E5%88%86%E6%9E%90%E9%9C%80%E6%B1%82" title="分析需求：" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">分析需求：</span></a></li>
+        <li class="blog-toc-item blog-toc-item--4"><a class="blog-toc-link" href="#%E8%AE%BE%E8%AE%A1API" title="设计API" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">设计API</span></a></li>
+        <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E6%B3%A8%E5%86%8C%E7%99%BB%E5%BD%95%E4%B8%8E%E5%88%9D%E8%AF%86Gorm" title="注册、登录与初识Gorm" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">注册、登录与初识Gorm</span></a></li>
             </ul>
         </nav>
     </aside>
@@ -37,9 +40,9 @@
         <article>
             <header class="blog-article-head">
                 <span class="blog-badge">GitHub Issue #8</span>
-                <h1 class="blog-article-title">使用Go快速搭建简易后端</h1>
+                <h1 class="blog-article-title">使用Go搭建后端示例</h1>
                 <p class="blog-article-meta">
-                    <a class="blog-byline-author" href="https://github.com/MoHanFox" target="_blank" rel="noopener noreferrer">MoHanFox</a><span class="blog-byline-sep" aria-hidden="true">-</span><span class="blog-byline-times"><span class="blog-byline-label">创建于:</span> <time class="blog-byline-date" datetime="2026-09-29">2026-09-29</time></span>
+                    <a class="blog-byline-author" href="https://github.com/MoHanFox" target="_blank" rel="noopener noreferrer">MoHanFox</a><span class="blog-byline-sep" aria-hidden="true">-</span><span class="blog-byline-times"><span class="blog-byline-label">创建于:</span> <time class="blog-byline-date" datetime="2026-09-29">2026-09-29</time><span class="blog-byline-bar" aria-hidden="true">丨</span><span class="blog-byline-label">修改于:</span> <time class="blog-byline-date" datetime="2026-10-01">2026-10-01</time></span>
                     
                 </p>
                                 <div class="blog-tags"><span class="blog-tag">Go/精选</span><span class="blog-tag">Go</span><span class="blog-tag">日常学习</span></div>
@@ -47,6 +50,11 @@
 
             <!-- 正文由 Markdown 在构建时渲染为 HTML -->
             <div class="blog-article">
+<h1 id="项目说明">项目说明
+</h1>
+<p>该博客旨在总结自己的Go学习，同时帮助您理解一些Go后端常用的模块组合
+本项目使用<strong>REST风格</strong>
+此博客以<strong>短链生成网站</strong>为模板为例子</p>
 <p>使用的Go模块: </p>
 <ul>
 <li>Gin:  Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。</li>
@@ -62,7 +70,6 @@
 <ol>
 <li>创造你的Go目录</li>
 <li>为你的项目装载以上模块</li>
-<li>本项目以<strong>自定义的Go控制台模拟前端</strong> + <strong>Go后端</strong>为示例进行</li>
 </ol>
 <pre><code class="language-go.mod"><span class="tok-keyword">require</span> (
 	github.com/gin-contrib/cors <span class="tok-version">v1.7.9</span>          <span class="tok-comment">//官方的Cors，本章节也会提供定制Cors</span>
@@ -84,8 +91,8 @@
 <span class="tok-keyword">import</span> <span class="tok-string">&quot;github.com/gin-gonic/gin&quot;</span>
 
 <span class="tok-keyword">func</span> <span class="tok-fn">main</span>() {
-  router := gin.<span class="tok-fn">Default</span>()
-  router.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/ping&quot;</span>, <span class="tok-keyword">func</span>(c *gin.Context) {
+  router := gin.<span class="tok-fn">Default</span>()        <span class="tok-comment">//注册一个路由</span>
+  router.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/ping&quot;</span>, <span class="tok-keyword">func</span>(c *gin.Context) {        <span class="tok-comment">//为路由添加API</span>
     c.<span class="tok-fn">JSON</span>(<span class="tok-number">200</span>, gin.H{
       <span class="tok-string">&quot;message&quot;</span>: <span class="tok-string">&quot;pong&quot;</span>,
     })
@@ -98,13 +105,50 @@
 你应该会看到：</p>
 <pre><code class="language-json">{<span class="tok-string">&quot;message&quot;</span>:<span class="tok-string">&quot;pong&quot;</span>}</code></pre>
 <p>恭喜你，你可以把你的gin应用做大做强了！</p>
-<h1 id="拓展你的接口与Rest规则">拓展你的接口与Rest规则
-</h1>
-<h2 id="Rest规则">Rest规则:
+<h1 id="拓展你的接口与Rest规则">拓展你的接口与Rest规则</h1>
+<h2 id="Rest规则">Rest规则
 </h2>
-<h2 id="拓展你的接口">拓展你的接口:
+<p>RESTful（Representational State Transfer）是一套 面向资源的 API 设计方法论，而非强制标准，核心目标是让接口具备「可读性强、可扩展、无状态、跨平台」的特性，是目前前后端 / 移动端接口设计的主流规范。详细可见：</p>
+<p>Gin 不是按 REST 规则设计的框架，它是一个通用的 Go HTTP Web 框架/路由框架。它“可以”用来写 RESTful API，而且很适合，但是否 RESTful 取决于你怎么设计接口，而不是 Gin 本身。</p>
+<p>Gin 并不强制 REST：你可以用 Gin 写：<a href="https://blog.csdn.net/qq_37257657/article/details/81206520#" target="_blank" rel="noopener noreferrer">https://blog.csdn.net/qq_37257657/article/details/81206520#</a></p>
+<pre><code class="language-go">r.<span class="tok-fn">POST</span>(<span class="tok-string">&quot;/getUser&quot;</span>, getUser)
+r.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/deleteUser&quot;</span>, deleteUser)</code></pre>
+<p>Gin 也可以很容易写 RESTful 风格：</p>
+<pre><code class="language-go">r.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/users/:id&quot;</span>, getUser)
+r.<span class="tok-fn">POST</span>(<span class="tok-string">&quot;/users&quot;</span>, createUser)
+r.<span class="tok-fn">PUT</span>(<span class="tok-string">&quot;/users/:id&quot;</span>, updateUser)
+r.<span class="tok-fn">DELETE</span>(<span class="tok-string">&quot;/users/:id&quot;</span>, deleteUser)</code></pre>
+<p>为了让你的项目可读，可积极使用RESTful风格，本项目使用REST风格为例</p>
+<h2 id="拓展你的接口">拓展你的接口
 </h2>
-<h1 id="Cors">Cors</h1>
+<p>本博客以短链生成网站为例子</p>
+<h3 id="分析需求">分析需求：
+</h3>
+<p>注册、登录,密码 bcrypt 哈希后入库
+登录签发随机 token,写入会话表,带有效期(默认 24 小时)
+鉴权中间件统一校验 token,未登录返回 401
+创建短链,后端生成唯一短码,按配置的公开地址拼出 short_url
+查看自己的短链列表和详情
+删除自己的短链
+访问短链 302 跳转,并给点击数 +1
+数据隔离:每个人只能看到和操作自己的短链
+每日创建配额:每个用户每天最多创建 N 条,超出返回 429
+CORS 配置化:允许的跨域来源写在配置里</p>
+<h3 id="设计API">设计API
+</h3>
+<p>为了更好地管理您的路由，你可以在跟目录创建一个 <code>Handler</code> 文件夹，并创建router.go</p>
+<pre><code class="language-router.go"><span class="tok-keyword">func</span> <span class="tok-fn">RegisterRoutes</span>(r *gin.Engine) {
+	api := r.<span class="tok-fn">Group</span>(<span class="tok-string">&quot;/api/v1&quot;</span>)
+	{
+		<span class="tok-comment">// 我们先从登录做起</span>
+		api.<span class="tok-fn">POST</span>(<span class="tok-string">&quot;/auth/register&quot;</span>, Register)
+		api.<span class="tok-fn">POST</span>(<span class="tok-string">&quot;/auth/login&quot;</span>, Login)
+	}
+
+	<span class="tok-comment">// 访问短链接不需要登录,直接 302 跳转</span>
+	r.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/r/:code&quot;</span>, Redirect)
+}</code></pre>
+<h1 id="注册登录与初识Gorm">注册、登录与初识Gorm</h1>
 <p>咕咕咕，之后再写</p>
 
             </div>
