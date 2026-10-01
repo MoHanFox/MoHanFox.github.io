@@ -32,6 +32,7 @@
         <li class="blog-toc-item blog-toc-item--4"><a class="blog-toc-link" href="#%E5%88%86%E6%9E%90%E9%9C%80%E6%B1%82" title="分析需求：" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">分析需求：</span></a></li>
         <li class="blog-toc-item blog-toc-item--4"><a class="blog-toc-link" href="#%E8%AE%BE%E8%AE%A1API" title="设计API" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">设计API</span></a></li>
         <li class="blog-toc-item blog-toc-item--2"><a class="blog-toc-link" href="#%E6%B3%A8%E5%86%8C%E7%99%BB%E5%BD%95%E4%B8%8E%E5%88%9D%E8%AF%86Gorm" title="注册、登录与初识Gorm" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">注册、登录与初识Gorm</span></a></li>
+        <li class="blog-toc-item blog-toc-item--3"><a class="blog-toc-link" href="#MySql%E9%83%A8%E5%88%86" title="MySql部分" onclick="event.preventDefault();var t=document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-84,behavior:'smooth'});history.replaceState(null,'',this.getAttribute('href'));}"><span class="blog-toc-tick"></span><span class="blog-toc-label">MySql部分</span></a></li>
             </ul>
         </nav>
     </aside>
@@ -58,10 +59,7 @@
 <p>使用的Go模块: </p>
 <ul>
 <li>Gin:  Gin 专为构建 REST API、Web 应用和微服务而设计，适用于对速度和开发效率有要求的场景。</li>
-<li>Gorm:  GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。<blockquote>
-<p>本章节使用 MySQL 数据库作演示</p>
-</blockquote>
-</li>
+<li>Gorm:  GORM 通过将 Go 结构体（Go structs） 映射到数据库表来简化数据库交互。</li>
 <li>Viper:  Viper是一个流行的Go库，用于处理各种配置需求和格式。它支持从多种来源读取配置，包括JSON、TOML、YAML、HCL、envfile和Java属性文件。</li>
 <li>Go: <a href="https://go.dev/" target="_blank" rel="noopener noreferrer">Go</a> <a href="https://go.dev/doc/devel/release#go1.25" target="_blank" rel="noopener noreferrer">1.25</a> 或更高版本</li>
 </ul>
@@ -69,42 +67,55 @@
 </h1>
 <ol>
 <li>创造你的Go目录</li>
-<li>为你的项目装载以上模块</li>
 </ol>
+<pre><code class="language-cmd">mkdir LinkDesk
+cd LinkDesk
+mkdir config, db, handler, middleware
+
+go mod init LinkDesk</code></pre>
+<ol start="2">
+<li>为你的项目装载以上模块
+依赖拉取</li>
+</ol>
+<pre><code class="language-cmd">go get github.com/gin-gonic/gin@v1.12.0 `
+        github.com/spf13/viper@v1.21.0 `
+        gorm.io/gorm@v1.31.2 `
+        gorm.io/driver/mysql@v1.6.0 `
+        golang.org/x/crypto@v0.56.0 `
+        github.com/gin-contrib/cors@v1.7.9</code></pre>
 <pre><code class="language-go.mod"><span class="tok-keyword">require</span> (
 	github.com/gin-contrib/cors <span class="tok-version">v1.7.9</span>          <span class="tok-comment">//官方的Cors，本章节也会提供定制Cors</span>
 	github.com/gin-gonic/gin <span class="tok-version">v1.12.0</span>
 	github.com/spf13/viper <span class="tok-version">v1.21.0</span>
 	gorm.io/driver/mysql <span class="tok-version">v1.6.0</span>
+        
 	gorm.io/gorm <span class="tok-version">v1.31.2</span>
+        golang.org/x/crypto <span class="tok-version">v0.56.0</span>       <span class="tok-comment">//哈希加密</span>
 )</code></pre>
-<ol start="3">
-<li>开始编写你的简易后端</li>
-</ol>
+<p>因为我们还没有引用一行代码，这些引用不着急加，后续IDE会帮忙补全的
+3. 开始编写你的简易后端</p>
 <h1 id="代码准备">代码准备
 </h1>
 <ol>
-<li>创建你的第一个 Gin 应用</li>
+<li>开始创建你的 Gin 应用</li>
 </ol>
 <pre><code class="language-mian.go"><span class="tok-keyword">package</span> main
 
 <span class="tok-keyword">import</span> <span class="tok-string">&quot;github.com/gin-gonic/gin&quot;</span>
 
 <span class="tok-keyword">func</span> <span class="tok-fn">main</span>() {
-  router := gin.<span class="tok-fn">Default</span>()        <span class="tok-comment">//注册一个路由</span>
-  router.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/ping&quot;</span>, <span class="tok-keyword">func</span>(c *gin.Context) {        <span class="tok-comment">//为路由添加API</span>
+  router := gin.<span class="tok-fn">Default</span>()        <span class="tok-comment">//创建一个 HTTP 引擎，router 负责登记所有路由，建议进入Default方法挖掘其用了什么中间件（重点）</span>
+  router.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/ping&quot;</span>, <span class="tok-keyword">func</span>(c *gin.Context) {        <span class="tok-comment">//为路由添加API, 处理函数签名。c 里装着请求和响应，c 一旦返回，这次请求就结束了</span>
     c.<span class="tok-fn">JSON</span>(<span class="tok-number">200</span>, gin.H{
       <span class="tok-string">&quot;message&quot;</span>: <span class="tok-string">&quot;pong&quot;</span>,
     })
   })
-  router.<span class="tok-fn">Run</span>() <span class="tok-comment">// listens on 0.0.0.0:8080 by default</span>
+  router.<span class="tok-fn">Run</span>()  <span class="tok-comment">// 不传参数时默认监听 0.0.0.0:8080</span>
 }</code></pre>
 <p>使用以下命令启动服务器：</p>
 <pre><code>go run main.go</code></pre>
-<p>在浏览器中访问 <a href="http://localhost:8080/ping" target="_blank" rel="noopener noreferrer">http://localhost:8080/ping</a>
-你应该会看到：</p>
-<pre><code class="language-json">{<span class="tok-string">&quot;message&quot;</span>:<span class="tok-string">&quot;pong&quot;</span>}</code></pre>
-<p>恭喜你，你可以把你的gin应用做大做强了！</p>
+<p>cmd运行<code>curl.exe -s http://localhost:8080/ping</code>，你大概率会看到<code>{&quot;message&quot;:&quot;pong&quot;}</code>
+恭喜你，你可以把你的gin应用做大做强了！</p>
 <h1 id="拓展你的接口与Rest规则">拓展你的接口与Rest规则</h1>
 <h2 id="Rest规则">Rest规则
 </h2>
@@ -138,18 +149,45 @@ CORS 配置化:允许的跨域来源写在配置里</p>
 </h3>
 <p>为了更好地管理您的路由，你可以在跟目录创建一个 <code>Handler</code> 文件夹，并创建router.go</p>
 <pre><code class="language-router.go"><span class="tok-keyword">func</span> <span class="tok-fn">RegisterRoutes</span>(r *gin.Engine) {
+	r.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/health&quot;</span>, <span class="tok-keyword">func</span>(c *gin.Context) {
+		c.<span class="tok-fn">JSON</span>(http.StatusOK, gin.H{<span class="tok-string">&quot;status&quot;</span>: <span class="tok-string">&quot;ok&quot;</span>})
+	})
+
 	api := r.<span class="tok-fn">Group</span>(<span class="tok-string">&quot;/api/v1&quot;</span>)
 	{
 		<span class="tok-comment">// 我们先从登录做起</span>
 		api.<span class="tok-fn">POST</span>(<span class="tok-string">&quot;/auth/register&quot;</span>, Register)
 		api.<span class="tok-fn">POST</span>(<span class="tok-string">&quot;/auth/login&quot;</span>, Login)
 	}
-
-	<span class="tok-comment">// 访问短链接不需要登录,直接 302 跳转</span>
-	r.<span class="tok-fn">GET</span>(<span class="tok-string">&quot;/r/:code&quot;</span>, Redirect)
 }</code></pre>
-<h1 id="注册登录与初识Gorm">注册、登录与初识Gorm</h1>
-<p>咕咕咕，之后再写</p>
+<p>在 <code>Handler</code> 文件夹下创建 <code>auth.go</code> 表示这是专门管 <code>账号</code> 的go代码，在 <code>auth.go</code> 中创建一下代码：</p>
+<pre><code class="language-auth.go"><span class="tok-keyword">func</span> <span class="tok-fn">Register</span>(c *gin.Context) {}
+<span class="tok-keyword">func</span> <span class="tok-fn">Login</span>(c *gin.Context) {}</code></pre>
+<p>接着，在main.go中路由</p>
+<pre><code class="language-main.go"><span class="tok-keyword">func</span> <span class="tok-fn">main</span>() {
+	r := gin.<span class="tok-fn">Default</span>()
+	r.<span class="tok-fn">Use</span>(<span class="tok-fn">GinCORSMiddleware</span>())
+	handler.<span class="tok-fn">RegisterRoutes</span>(r)
+
+	r.<span class="tok-fn">Run</span>(<span class="tok-string">&quot;:8080&quot;</span>)    <span class="tok-comment">//在8080端口运行服务器</span>
+}
+
+<span class="tok-keyword">func</span> <span class="tok-fn">GinCORSMiddleware</span>() gin.HandlerFunc {
+	c := cors.Config{
+		AllowOrigins:     <span class="tok-string">&quot;&quot;</span>,
+		AllowMethods:     []<span class="tok-type">string</span>{<span class="tok-string">&quot;GET&quot;</span>, <span class="tok-string">&quot;POST&quot;</span>, <span class="tok-string">&quot;PUT&quot;</span>, <span class="tok-string">&quot;DELETE&quot;</span>, <span class="tok-string">&quot;OPTIONS&quot;</span>},
+		AllowHeaders:     []<span class="tok-type">string</span>{<span class="tok-string">&quot;Origin&quot;</span>, <span class="tok-string">&quot;Content-Type&quot;</span>, <span class="tok-string">&quot;Authorization&quot;</span>, <span class="tok-string">&quot;X-Requested-With&quot;</span>},
+		ExposeHeaders:    []<span class="tok-type">string</span>{<span class="tok-string">&quot;Content-Length&quot;</span>, <span class="tok-string">&quot;X-Total-Count&quot;</span>},
+		AllowCredentials: true,
+		MaxAge:           <span class="tok-number">12</span> * time.Hour,
+	}
+	<span class="tok-keyword">return</span> cors.<span class="tok-fn">New</span>(c)
+}</code></pre>
+<h1 id="注册登录与初识Gorm">注册、登录与初识Gorm
+</h1>
+<h2 id="MySql部分">MySql部分
+</h2>
+<p>本篇默认您会使用MySql，再次不多做赘述，在这之前，为了方便起见，请在Mysql的root里创建linkdesk目录，Gorm在处理未有数据时会自建表格</p>
 
             </div>
         </article>
