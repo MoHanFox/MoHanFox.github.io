@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T13:40:55.446Z",
+  "generatedAt": "2026-10-01T13:42:27.199Z",
   "repo": "MoHanFox/MoHanFox.github.io",
   "count": 20,
   "issues": [
@@ -365,12 +365,12 @@
     },
     {
       "number": 8,
-      "title": "用Go搭建后端示例 [LinkDesk] #做法篇",
+      "title": "用Go搭建后端示例 [LinkDesk]",
       "author": "MoHanFox",
       "url": "https://github.com/MoHanFox/MoHanFox.github.io/issues/8",
       "state": "open",
       "createdAt": "2026-09-29T15:09:50Z",
-      "updatedAt": "2026-10-01T13:40:39Z",
+      "updatedAt": "2026-10-01T13:42:11Z",
       "labels": [
         "blog",
         "Go/精选",
