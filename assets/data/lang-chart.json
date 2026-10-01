@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T13:48:13.498Z",
+  "generatedAt": "2026-10-01T13:59:25.484Z",
   "owner": "MoHanFox",
   "giteeOwner": "MoHanBi",
   "repoCount": 3,
@@ -10,25 +10,25 @@
     },
     "gitee": {
       "languages": 11,
-      "bytes": 790773
+      "bytes": 708002
     }
   },
   "languages": [
     {
       "name": "JavaScript",
-      "bytes": 477664
+      "bytes": 422340
     },
     {
       "name": "C#",
       "bytes": 206972
     },
     {
-      "name": "HTML",
-      "bytes": 148084
+      "name": "CSS",
+      "bytes": 132785
     },
     {
-      "name": "CSS",
-      "bytes": 143452
+      "name": "HTML",
+      "bytes": 131304
     },
     {
       "name": "GLSL",
